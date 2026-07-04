@@ -1,0 +1,1217 @@
+1|1|<!DOCTYPE html>
+2|2|<html lang="th">
+3|3|<head>
+4|4|<meta charset="UTF-8">
+5|5|<meta name="viewport" content="width=device-width, initial-scale=1.0">
+6|6|<title>CTF Tools Reference</title>
+7|7|<style>
+8|8|  :root {
+9|9|    --bg: #0d1117;
+10|10|    --bg2: #161b22;
+11|11|    --bg3: #21262d;
+12|12|    --border: #30363d;
+13|13|    --text: #c9d1d9;
+14|14|    --muted: #8b949e;
+15|15|    --accent: #58a6ff;
+16|16|    --accent2: #3fb950;
+17|17|    --accent3: #f78166;
+18|18|    --accent4: #d2a8ff;
+19|19|    --accent5: #ffa657;
+20|20|    --accent6: #79c0ff;
+21|21|    --tag-bg: #1f3a5f;
+22|22|    --search-bg: #0d1117;
+23|23|  }
+24|24|  * { box-sizing: border-box; margin: 0; padding: 0; }
+25|25|  body { background: var(--bg); color: var(--text); font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; font-size: 14px; line-height: 1.6; }
+26|26|
+27|27|  /* Layout */
+28|28|  #app { display: flex; min-height: 100vh; }
+29|29|  #sidebar { width: 260px; min-width: 260px; background: var(--bg2); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+30|30|  #main { flex: 1; padding: 32px 40px; max-width: 1100px; }
+31|31|
+32|32|  /* Sidebar */
+33|33|  .sidebar-header { padding: 20px 16px 12px; border-bottom: 1px solid var(--border); }
+34|34|  .sidebar-header h1 { font-size: 16px; font-weight: 700; color: var(--accent); letter-spacing: .3px; }
+35|35|  .sidebar-header p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+36|36|  #search-box { margin: 12px; padding: 8px 12px; background: var(--search-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; width: calc(100% - 24px); outline: none; transition: border .2s; }
+37|37|  #search-box:focus { border-color: var(--accent); }
+38|38|  .nav-section { padding: 8px 0; }
+39|39|  .nav-label { padding: 4px 16px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+40|40|  .nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 16px; cursor: pointer; border-radius: 0; transition: background .15s; font-size: 13px; color: var(--text); text-decoration: none; border: none; background: none; width: 100%; text-align: left; }
+41|41|  .nav-item:hover, .nav-item.active { background: var(--bg3); color: var(--accent); }
+42|42|  .nav-item .icon { font-size: 15px; width: 20px; text-align: center; }
+43|43|  .nav-count { margin-left: auto; background: var(--bg3); color: var(--muted); font-size: 10px; padding: 1px 6px; border-radius: 10px; }
+44|44|
+45|45|  /* Main content */
+46|46|  .page-header { margin-bottom: 32px; }
+47|47|  .page-header h2 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+48|48|  .page-header p { color: var(--muted); font-size: 14px; }
+49|49|
+50|50|  .section { margin-bottom: 48px; scroll-margin-top: 24px; }
+51|51|  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+52|52|  .section-icon { font-size: 22px; }
+53|53|  .section-title { font-size: 20px; font-weight: 700; }
+54|54|  .section-desc { color: var(--muted); font-size: 13px; margin-top: 2px; }
+55|55|
+56|56|  .subsection { margin-bottom: 20px; }
+57|57|  .subsection-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+58|58|
+59|59|  /* Tool cards */
+60|60|  .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+61|61|  .tool-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; transition: border-color .2s, transform .15s; cursor: default; }
+62|62|  .tool-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+63|63|  .tool-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+64|64|  .tool-name { font-weight: 600; font-size: 14px; color: var(--accent); }
+65|65|  .tool-link { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-size: 12px; text-decoration: none; background: var(--tag-bg); padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+66|66|  .tool-link:hover { background: var(--accent); color: #000; }
+67|67|  .tool-desc { font-size: 13px; color: var(--text); margin-bottom: 8px; }
+68|68|  .tool-usage { background: var(--bg3); border-radius: 5px; padding: 8px 10px; margin-top: 8px; }
+69|69|  .tool-usage-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+70|70|  .tool-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+71|71|  .tag { font-size: 10px; padding: 2px 7px; border-radius: 12px; font-weight: 500; }
+72|72|  .tag-online { background: #1a3a2a; color: var(--accent2); }
+73|73|  .tag-cli { background: #3a1a1a; color: var(--accent3); }
+74|74|  .tag-python { background: #2a1a3a; color: var(--accent4); }
+75|75|  .tag-java { background: #3a2a1a; color: var(--accent5); }
+76|76|  .tag-ruby { background: #1a2a3a; color: var(--accent6); }
+77|77|
+78|78|  /* Code blocks */
+79|79|  pre { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; overflow-x: auto; font-size: 12px; line-height: 1.7; font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace; color: #e6edf3; margin: 8px 0; }
+80|80|  code { background: var(--bg3); padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: 'SFMono-Regular',Consolas,monospace; color: #e6edf3; }
+81|81|
+82|82|  /* Tips/notes */
+83|83|  .tip { background: #132034; border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; padding: 10px 14px; margin: 12px 0; font-size: 13px; }
+84|84|  .warn { background: #2a1f0e; border-left: 3px solid var(--accent5); border-radius: 0 6px 6px 0; padding: 10px 14px; margin: 12px 0; font-size: 13px; }
+85|85|
+86|86|  /* Search highlight */
+87|87|  mark { background: #3d2c00; color: #ffd700; border-radius: 2px; padding: 0 2px; }
+88|88|
+89|89|  /* Search results */
+90|90|  #search-results { display: none; }
+91|91|  .search-result-item { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; }
+92|92|  .search-result-item:hover { border-color: var(--accent); }
+93|93|  .search-result-cat { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+94|94|
+95|95|  /* Scrollbar */
+96|96|  ::-webkit-scrollbar { width: 6px; }
+97|97|  ::-webkit-scrollbar-track { background: var(--bg2); }
+98|98|  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+99|99|
+100|100|  /* Responsive */
+101|101|  @media (max-width: 768px) {
+102|102|    #sidebar { display: none; }
+103|103|    #main { padding: 16px; }
+104|104|    .tool-grid { grid-template-columns: 1fr; }
+105|105|  }
+106|106|
+107|107|  /* Back to top */
+108|108|  #back-top { position: fixed; bottom: 24px; right: 24px; background: var(--accent); color: #000; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; opacity: 0; transition: opacity .3s; display: flex; align-items: center; justify-content: center; }
+109|109|  #back-top.visible { opacity: 1; }
+110|110|</style>
+111|111|</head>
+112|112|<body>
+113|113|<div id="app">
+114|114|<nav id="sidebar">
+115|115|  <div class="sidebar-header">
+116|116|    <h1>⚑ CTF Tools</h1>
+117|117|    <p>Reference &amp; Cheatsheet</p>
+118|118|  </div>
+119|119|  <input id="search-box" type="text" placeholder="ค้นหาเครื่องมือ..." autocomplete="off">
+120|120|  <div class="nav-section">
+121|121|    <div class="nav-label">Categories</div>
+122|122|    <button class="nav-item active" onclick="showSection('all')"><span class="icon">🏠</span>ทั้งหมด</button>
+123|123|    <button class="nav-item" onclick="showSection('training')"><span class="icon">🚩</span>Training <span class="nav-count">4</span></button>
+124|124|    <button class="nav-item" onclick="showSection('general')"><span class="icon">📋</span>General <span class="nav-count">9</span></button>
+125|125|    <button class="nav-item" onclick="showSection('crypto')"><span class="icon">🔒</span>Cryptography <span class="nav-count">14</span></button>
+126|126|    <button class="nav-item" onclick="showSection('stego')"><span class="icon">🎨</span>Steganography <span class="nav-count">8</span></button>
+127|127|    <button class="nav-item" onclick="showSection('web')"><span class="icon">🕸️</span>Web <span class="nav-count">7</span></button>
+128|128|    <button class="nav-item" onclick="showSection('pwn')"><span class="icon">🐛</span>Pwn / Binary <span class="nav-count">5</span></button>
+129|129|    <button class="nav-item" onclick="showSection('forensics')"><span class="icon">🕵️</span>Forensics <span class="nav-count">6</span></button>
+130|130|    <button class="nav-item" onclick="showSection('osint')"><span class="icon">🌐</span>OSINT <span class="nav-count">4</span></button>
+131|131|    <button class="nav-item" onclick="showSection('reversing')"><span class="icon">↩️</span>Reversing <span class="nav-count">4</span></button>
+132|132|    <button class="nav-item" onclick="showSection('network')"><span class="icon">📡</span>Network <span class="nav-count">5</span></button>
+133|133|    <button class="nav-item" onclick="showSection('misc')"><span class="icon">🔧</span>Misc / Tips <span class="nav-count">8</span></button>
+134|134|  </div>
+135|135|  <div style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);">
+136|136|    Based on <a href="https://github.com/gregalletti/CTF_tools" style="color:var(--accent);text-decoration:none;">gregalletti/CTF_tools</a><br>Extended by Kiro 🤖
+137|137|  </div>
+138|138|</nav>
+139|139|<main id="main">
+140|140|
+141|
+142|<!-- SEARCH RESULTS -->
+143|<div id="search-results">
+144|  <div class="page-header"><h2>🔍 ผลการค้นหา</h2><p id="search-count"></p></div>
+145|  <div id="search-list"></div>
+146|</div>
+147|
+148|<!-- ALL SECTIONS WRAPPER -->
+149|<div id="all-sections">
+150|
+151|<!-- TRAINING -->
+152|<div class="section" id="sec-training">
+153|  <div class="section-header">
+154|    <span class="section-icon">🚩</span>
+155|    <div>
+156|      <div class="section-title">Training</div>
+157|      <div class="section-desc">เว็บฝึกทักษะ CTF สำหรับมือใหม่และมืออาชีพ</div>
+158|    </div>
+159|  </div>
+160|  <div class="tool-grid">
+161|    <div class="tool-card">
+162|      <div class="tool-card-top"><span class="tool-name">picoCTF</span><a class="tool-link" href="https://picoctf.org/" target="_blank">🔗 เปิด</a></div>
+163|      <div class="tool-desc">แพลตฟอร์ม CTF สำหรับนักเรียน/นักศึกษา จาก Carnegie Mellon University มี challenge ครบทุก category ระดับ beginner ถึง intermediate</div>
+164|      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+165|    </div>
+166|    <div class="tool-card">
+167|      <div class="tool-card-top"><span class="tool-name">OverTheWire</span><a class="tool-link" href="https://overthewire.org/wargames/" target="_blank">🔗 เปิด</a></div>
+168|      <div class="tool-desc">Wargames แบบ SSH-based เหมาะสำหรับฝึก Linux, privilege escalation, binary exploitation เริ่มต้นที่ Bandit สำหรับ beginner</div>
+169|      <div class="tool-usage">
+170|        <div class="tool-usage-label">เริ่มต้น</div>
+171|        <pre>ssh bandit0@bandit.labs.overthewire.org -p 2220
+172|# password: bandit0</pre>
+173|      </div>
+174|      <div class="tool-tags"><span class="tag tag-cli">CLI</span><span class="tag tag-online">Online</span></div>
+175|    </div>
+176|    <div class="tool-card">
+177|      <div class="tool-card-top"><span class="tool-name">pwnable.kr</span><a class="tool-link" href="http://pwnable.kr/" target="_blank">🔗 เปิด</a></div>
+178|      <div class="tool-desc">เน้น binary exploitation / pwn challenges เป็นหลัก มี challenge ตั้งแต่ง่ายมากจนถึงยากมาก</div>
+179|      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+180|    </div>
+181|    <div class="tool-card">
+182|      <div class="tool-card-top"><span class="tool-name">capturetheflag.it</span><a class="tool-link" href="https://capturetheflag.it/risorse/come-imparo" target="_blank">🔗 เปิด</a></div>
+183|      <div class="tool-desc">รวม resources สอน CTF ภาษาอิตาลี มีแหล่งเรียนรู้หลายอย่าง</div>
+184|      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+185|    </div>
+186|  </div>
+187|</div>
+188|
+189|<!-- GENERAL -->
+190|<div class="section" id="sec-general">
+191|  <div class="section-header">
+192|    <span class="section-icon">📋</span>
+193|    <div>
+194|      <div class="section-title">General Tools</div>
+195|      <div class="section-desc">เครื่องมือทั่วไปที่ใช้ได้ทุก category</div>
+196|    </div>
+197|  </div>
+198|  <div class="tool-grid">
+199|    <div class="tool-card">
+200|      <div class="tool-card-top"><span class="tool-name">CyberChef</span><a class="tool-link" href="https://gchq.github.io/CyberChef/" target="_blank">🔗 เปิด</a></div>
+201|      <div class="tool-desc">เครื่องมือ all-in-one จาก GCHQ ทำได้ทุกอย่าง: decode/encode base64, XOR, hash, compress, hex dump, regex, และอีกร้อยกว่า operation สามารถ chain operations ต่อกันได้</div>
+202|      <div class="tool-usage">
+203|        <div class="tool-usage-label">ตัวอย่าง Recipe</div>
+204|        <pre>From Base64 → XOR (key: 0x41) → To Hex</pre>
+205|      </div>
+206|      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+207|    </div>
+208|    <div class="tool-card">
+209|      <div class="tool-card-top"><span class="tool-name">Hex Editor Online</span><a class="tool-link" href="https://hexed.it/" target="_blank">🔗 เปิด</a></div>
+210|      <div class="tool-desc">Hex editor ออนไลน์ drag &amp; drop ไฟล์เพื่อดู/แก้ hex bytes ได้ทันที มีฟีเจอร์ search, highlight, export</div>
+211|      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+212|    </div>
+213|    <div class="tool-card">
+214|      <div class="tool-card-top"><span class="tool-name">Katana (John Hammond)</span><a class="tool-link" href="https://github.com/JohnHammond/ctf-katana" target="_blank">🔗 GitHub</a></div>
+215|      <div class="tool-desc">รวม CTF tools และ cheatsheet ขนาดใหญ่มากจาก John Hammond ครอบคลุมทุก category มีทั้ง scripts และ one-liners</div>
+216|      <div class="tool-tags"><span class="tag tag-cli">CLI</span><span class="tag tag-python">Python</span></div>
+217|    </div>
+218|    <div class="tool-card">
+219|      <div class="tool-card-top"><span class="tool-name">Online Converter</span><a class="tool-link" href="https://www.rapidtables.com/convert/number/ascii-hex-bin-dec-converter.html" target="_blank">🔗 เปิด</a></div>
+220|      <div class="tool-desc">แปลง ASCII / Hex / Dec / Bin / Base64 ได้ทีละหลาย format พร้อมกัน</div>
+221|      <div class="tool-usage">
+222|        <div class="tool-usage-label">Command Line แทน (ใน terminal)</div>
+223|        <pre>python3 -c "print(bytes.fromhex('666c6167').decode())"
+224|echo -n 'flag' | xxd
+225|echo -n 'flag' | base64</pre>
+226|      </div>
+227|      <div class="tool-tags"><span class="tag tag-online">Online</span><span class="tag tag-cli">CLI</span></div>
+228|    </div>
+229|    <div class="tool-card">
+230|      <div class="tool-card-top"><span class="tool-name">XOR Calculator</span><a class="tool-link" href="http://xor.pw/" target="_blank">🔗 เปิด</a></div>
+231|      <div class="tool-desc">คำนวณ XOR ออนไลน์ ทั้ง single byte, multi-byte key, และ bruteforce XOR key</div>
+232|      <div class="tool-usage">
+233|        <div class="tool-usage-label">Python XOR one-liner</div>
+234|        <pre>python3 -c "ct=bytes.fromhex('1b3b1b'); key=0x41; print(bytes([b^key for b in ct]))"
+235|# XOR with repeating key:
+236|python3 -c "
+237|from itertools import cycle
+238|ct = bytes.fromhex('deadbeef')
+239|key = b'key'
+240|print(bytes([a^b for a,b in zip(ct,cycle(key))]))
+241|"</pre>
+242|      </div>
+243|      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+244|    </div>
+245|    <div class="tool-card">
+246|      <div class="tool-card-top"><span class="tool-name">ASCII Table</span><a class="tool-link" href="http://www.asciitable.com/" target="_blank">🔗 เปิด</a></div>
+247|      <div class="tool-desc">ตาราง ASCII ครบทั้ง decimal, hex, octal และ HTML entity ควรเปิดค้างไว้ตลอด</div>
+248|      <div class="tool-usage">
+249|        <div class="tool-usage-label">Python quick lookup</div>
+250|        <pre>python3 -c "print(ord('A'), chr(65))"  # 65, 'A'</pre>
+251|      </div>
+252|      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+253|    </div>
+254|    <div class="tool-card">
+255|      <div class="tool-card-top"><span class="tool-name">Zip Password Cracker</span><a class="tool-link" href="https://passwordrecovery.io/zip-file-password-removal/" target="_blank">🔗 เปิด</a></div>
+256|      <div class="tool-desc">ถอด password ไฟล์ ZIP ออนไลน์ฟรี สำหรับ password ที่ไม่ซับซ้อน</div>
+257|      <div class="tool-usage">
+258|        <div class="tool-usage-label">หรือใช้ john / hashcat</div>
+259|        <pre>zip2john secret.zip > zip.hash
+260|john zip.hash --wordlist=/usr/share/wordlists/rockyou.txt</pre>
+261|      </div>
+262|      <div class="tool-tags"><span class="tag tag-online">Online</span><span class="tag tag-cli">CLI</span></div>
+263|    </div>
+264|    <div class="tool-card">
+265|      <div class="tool-card-top"><span class="tool-name">Github Secrets</span><a class="tool-link" href="https://github.com/neodyme-labs/github-secrets" target="_blank">🔗 GitHub</a></div>
+266|      <div class="tool-desc">ค้นหา dangling commits และ force-pushed commits ใน GitHub repo ที่อาจซ่อนข้อมูลลับไว้</div>
+267|      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+268|    </div>
+269|    <div class="tool-card">
+270|      <div class="tool-card-top"><span class="tool-name">Regex Check</span><a class="tool-link" href="https://www.debuggex.com/" target="_blank">🔗 เปิด</a></div>
+271|      <div class="tool-desc">ทดสอบ regular expression แบบ visual มี diagram แสดง state machine</div>
+272|      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+273|    </div>
+274|  </div>
+275|</div>
+276|
+277|
+<!-- CRYPTOGRAPHY -->
+<div class="section" id="sec-crypto">
+  <div class="section-header">
+    <span class="section-icon">🔒</span>
+    <div>
+      <div class="section-title">Cryptography</div>
+      <div class="section-desc">เครื่องมือถอด/วิเคราะห์รหัส — classical ciphers, RSA, hash cracking</div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">🛠 Tools</div>
+    <div class="tool-grid">
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">dCode</span><a class="tool-link" href="https://www.dcode.fr" target="_blank">🔗 เปิด</a></div>
+        <div class="tool-desc">สวรรค์ของ cryptography — รวมตัวถอดรหัสมากกว่า 200+ cipher ทั้ง Caesar, Vigenere, Base*, Rail Fence, Playfair, Bacon, Polybius ฯลฯ มี cipher identifier ด้วย</div>
+        <div class="tip">💡 ถ้าไม่รู้ว่าเป็น cipher อะไร ให้ลอง <strong>Cipher Identifier</strong> ที่ dCode ก่อนเสมอ</div>
+        <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">RsaCtfTool</span><a class="tool-link" href="https://github.com/Ganapati/RsaCtfTool" target="_blank">🔗 GitHub</a></div>
+        <div class="tool-desc">เครื่องมือโจมตี RSA อัตโนมัติ รองรับ attacks หลายรูปแบบ: factordb, wiener, small_e, common modulus, hastad, LSB oracle ฯลฯ</div>
+        <div class="tool-usage">
+          <div class="tool-usage-label">ติดตั้ง &amp; ใช้งาน</div>
+          <pre>git clone https://github.com/Ganapati/RsaCtfTool
+cd RsaCtfTool && pip3 install -r requirements.txt
+
+# จากไฟล์ public key + ciphertext
+python3 RsaCtfTool.py --publickey pub.pem --uncipherfile cipher.enc
+
+# ระบุ n, e โดยตรง
+python3 RsaCtfTool.py --n 1234567890... --e 65537 --uncipher 9876543210...
+
+# ลองทุก attack
+python3 RsaCtfTool.py --publickey pub.pem --attack all</pre>
+        </div>
+        <div class="tool-tags"><span class="tag tag-python">Python</span><span class="tag tag-cli">CLI</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">FactorDB</span><a class="tool-link" href="http://factordb.com/" target="_blank">🔗 เปิด</a></div>
+        <div class="tool-desc">ฐานข้อมูล integer factorization ถ้า n ของ RSA เคยถูก factor มาก่อน จะพบที่นี่ทันที</div>
+        <div class="tool-usage">
+          <div class="tool-usage-label">ใช้ใน Python</div>
+          <pre>from factordb.factordb import FactorDB
+f = FactorDB(n)
+f.connect()
+print(f.get_factor_list())  # [p, q]</pre>
+        </div>
+        <div class="tool-tags"><span class="tag tag-online">Online</span><span class="tag tag-python">Python</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">CrackStation</span><a class="tool-link" href="https://crackstation.net/" target="_blank">🔗 เปิด</a></div>
+        <div class="tool-desc">ถอด hash ออนไลน์ฟรี รองรับ MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512 มี rainbow table ขนาดใหญ่มาก</div>
+        <div class="tool-usage">
+          <div class="tool-usage-label">หรือใช้ hashcat</div>
+          <pre># MD5
+hashcat -m 0 hash.txt /usr/share/wordlists/rockyou.txt
+# SHA-256
+hashcat -m 1400 hash.txt rockyou.txt
+# bcrypt
+hashcat -m 3200 hash.txt rockyou.txt</pre>
+        </div>
+        <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">QuipQiup</span><a class="tool-link" href="https://quipqiup.com/" target="_blank">🔗 เปิด</a></div>
+        <div class="tool-desc">Substitution cipher solver แบบอัตโนมัติ ใช้ frequency analysis ไม่ต้องรู้ key รองรับการใส่ hint เพิ่มเติม</div>
+        <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">Vigenere Solver</span><a class="tool-link" href="https://www.guballa.de/vigenere-solver" target="_blank">🔗 เปิด</a></div>
+        <div class="tool-desc">ถอด Vigenere cipher แบบ brute-force หาความยาว key อัตโนมัติ</div>
+        <div class="tool-usage">
+          <div class="tool-usage-label">หรือใช้ Python</div>
+          <pre>from pycipher import Vigenere
+Vigenere('KEY').decipher('CIPHERTEXT')
+
+# Kasiski + Index of Coincidence test (ใช้ lib: pycryptodome)
+</pre>
+        </div>
+        <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">RSA Step-by-Step</span><a class="tool-link" href="https://www.cryptool.org/en/cto/highlights/rsa-step-by-step" target="_blank">🔗 เปิด</a></div>
+        <div class="tool-desc">Calculator แสดง RSA ทีละ step: key generation, encryption, decryption รองรับตัวเลขขนาดใหญ่</div>
+        <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">SageMath Online</span><a class="tool-link" href="https://sagecell.sagemath.org/" target="_blank">🔗 เปิด</a></div>
+        <div class="tool-desc">Sage environment ออนไลน์สำหรับคำนวณ crypto — modular arithmetic, polynomial factoring, elliptic curves</div>
+        <div class="tool-usage">
+          <div class="tool-usage-label">ตัวอย่าง RSA decryption ใน Sage</div>
+          <pre>p = 61; q = 53; e = 17
+n = p*q
+phi = (p-1)*(q-1)
+d = inverse_mod(e, phi)
+# decrypt: m = pow(c, d, n)
+m = pow(2790, d, n)
+print(m)</pre>
+        </div>
+        <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">Morse Code Translator</span><a class="tool-link" href="https://morsecode.world/international/translator.html" target="_blank">🔗 เปิด</a></div>
+        <div class="tool-desc">แปลง text ↔ Morse code ทั้งแบบ text และ audio</div>
+        <div class="tool-usage">
+          <div class="tool-usage-label">Python quick decode</div>
+          <pre>MORSE = {'.-':'A','-.':'B','-.-. ':'C',...}
+# หรือ pip install morse-talk
+import morse
+morse.decode('.... . .-.. .-.. ---')</pre>
+        </div>
+        <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">DTMF Dual Tone Decoder</span><a class="tool-link" href="http://dialabc.com/sound/detect/" target="_blank">🔗 เปิด</a></div>
+        <div class="tool-desc">วิเคราะห์ DTMF tones จาก audio file — เสียง dial ของโทรศัพท์ที่อาจซ่อน flag ไว้</div>
+        <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">Hash Identifier</span><a class="tool-link" href="https://tools.kali.org/password-attacks/hash-identifier" target="_blank">🔗 Kali</a></div>
+        <div class="tool-desc">ระบุประเภทของ hash จาก pattern</div>
+        <div class="tool-usage">
+          <div class="tool-usage-label">ใช้งาน (Kali)</div>
+          <pre>hash-identifier
+# หรือใช้ hashid:
+pip3 install hashid
+hashid 5d41402abc4b2a76b9719d911017c592</pre>
+        </div>
+        <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top"><span class="tool-name">gmpy2</span><a class="tool-link" href="https://gmpy2.readthedocs.io/" target="_blank">🔗 Docs</a></div>
+        <div class="tool-desc">Python library สำหรับ big number arithmetic ใช้งานใน RSA CTF challenges บ่อยมาก</div>
+        <div class="tool-usage">
+          <div class="tool-usage-label">ตัวอย่าง</div>
+          <pre>import gmpy2
+# modular inverse
+d = int(gmpy2.invert(e, phi))
+# integer sqrt
+root, exact = gmpy2.iroot(n, 2)  # sqrt(n)
+# power mod
+m = int(gmpy2.powmod(c, d, n))</pre>
+        </div>
+        <div class="tool-tags"><span class="tag tag-python">Python</span></div>
+      </div>
+
+    </div><!-- tool-grid -->
+  </div><!-- subsection tools -->
+
+  <div class="subsection">
+    <div class="subsection-title">📚 Common CTF Crypto Patterns</div>
+    <div class="tool-grid">
+      <div class="tool-card">
+        <div class="tool-name" style="margin-bottom:8px">RSA Attack Checklist</div>
+        <pre>1. Small e (e=3) + small m  → cube root attack
+2. Small d (Wiener)         → RsaCtfTool --attack wiener
+3. n=p*q ที่ p≈q (smooth)  → Fermat factorization
+4. Common modulus           → gcd(n1,n2) != 1
+5. e=1                      → m = c
+6. p,q จาก FactorDB        → ตรงๆ เลย
+7. Hastad (same m, multiple n) → CRT + cube root</pre>
+        <div class="tool-tags"><span class="tag tag-python">Python</span></div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name" style="margin-bottom:8px">Classic Cipher Quick ID</div>
+        <pre>Only A-Z uppercase, no spaces → Caesar / Vigenere
+Numbers only (1-26)           → A1Z26
+Dots and dashes               → Morse
++ . symbols                   → Tap code / Braille
+Symbol substitution           → dCode Symbolic Ciphers
+Bacon's cipher                → A/B or 0/1 sequences
+Polybius square               → 2-digit numbers 1-5</pre>
+        <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /sec-crypto -->
+
+<!-- STEGANOGRAPHY -->
+<div class="section" id="sec-stego">
+  <div class="section-header">
+    <span class="section-icon">🎨</span>
+    <div>
+      <div class="section-title">Steganography</div>
+      <div class="section-desc">ค้นหาและสกัดข้อมูลซ่อนในรูปภาพ, เสียง, วิดีโอ</div>
+    </div>
+  </div>
+  <div class="tool-grid">
+
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Aperi'Solve</span><a class="tool-link" href="https://aperisolve.fr/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">One-stop stego analysis — อัปโหลดรูปแล้วรัน zsteg, steghide, exiftool, binwalk, foremost, strings ให้ครบใน click เดียว</div>
+      <div class="tip">💡 เริ่ม stego ด้วย Aperi'Solve ก่อนเสมอ — ประหยัดเวลามาก</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">StegOnline</span><a class="tool-link" href="https://stegonline.georgeom.net" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">ดู bit planes ของรูปภาพ แยก LSB ทีละ bit ดู color channels แยก extract embedded data</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Stegsolve</span><a class="tool-link" href="https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve" target="_blank">🔗 GitHub</a></div>
+      <div class="tool-desc">Java GUI tool สำหรับ bit plane analysis, XOR/AND/OR combine สองภาพ, color filter ดู hidden text</div>
+      <div class="tool-usage">
+        <div class="tool-usage-label">รัน</div>
+        <pre>java -jar stegsolve.jar</pre>
+      </div>
+      <div class="tool-tags"><span class="tag tag-java">Java</span></div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">steghide</span><a class="tool-link" href="http://steghide.sourceforge.net/documentation/manpage.php" target="_blank">🔗 Docs</a></div>
+      <div class="tool-desc">ฝัง/สกัดข้อมูลใน JPEG, BMP, WAV, AU — มักใช้กับ password</div>
+      <div class="tool-usage">
+        <div class="tool-usage-label">ใช้งาน</div>
+        <pre># สกัดข้อมูล (ไม่มี password)
+steghide extract -sf image.jpg -p ""
+# ด้วย password
+steghide extract -sf image.jpg -p mysecret
+# ดู info
+steghide info image.jpg</pre>
+      </div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Stegseek</span><a class="tool-link" href="https://github.com/RickdeJager/stegseek" target="_blank">🔗 GitHub</a></div>
+      <div class="tool-desc">steghide cracker ความเร็วสูง brute-force password ของ steghide ด้วย wordlist ได้เร็วมาก</div>
+      <div class="tool-usage">
+        <div class="tool-usage-label">ใช้งาน</div>
+        <pre>stegseek image.jpg /usr/share/wordlists/rockyou.txt
+# ถ้า password ว่าง:
+stegseek --crack image.jpg wordlist.txt</pre>
+      </div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">zsteg</span><a class="tool-link" href="https://github.com/zed-0xff/zsteg" target="_blank">🔗 GitHub</a></div>
+      <div class="tool-desc">ตรวจหา steganography ใน PNG และ BMP — LSB, MSB, bit planes, text, zlib hidden data</div>
+      <div class="tool-usage">
+        <div class="tool-usage-label">ใช้งาน</div>
+        <pre>gem install zsteg
+zsteg image.png           # scan ทุก channel
+zsteg -a image.png        # scan ทุก combination
+zsteg -E "b1,rgb,lsb,xy" image.png  # extract specific</pre>
+      </div>
+      <div class="tool-tags"><span class="tag tag-ruby">Ruby</span><span class="tag tag-cli">CLI</span></div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">binwalk</span><a class="tool-link" href="https://github.com/ReFirmLabs/binwalk" target="_blank">🔗 GitHub</a></div>
+      <div class="tool-desc">ค้นหา embedded files/data ภายในไฟล์ binary โดยดู magic bytes — พบไฟล์ซ่อนในรูปได้บ่อยมาก</div>
+      <div class="tool-usage">
+        <div class="tool-usage-label">ใช้งาน</div>
+        <pre>binwalk image.png               # scan
+binwalk -e image.png            # extract
+binwalk -dd '.*' image.png      # extract everything
+binwalk --dd 'zip archive' file # extract zip เท่านั้น</pre>
+      </div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span><span class="tag tag-python">Python</span></div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">exiftool</span><a class="tool-link" href="https://exiftool.org/" target="_blank">🔗 Docs</a></div>
+      <div class="tool-desc">อ่าน/แก้ metadata ของไฟล์ image, audio, video — flag มักซ่อนอยู่ใน comment หรือ EXIF fields</div>
+      <div class="tool-usage">
+        <div class="tool-usage-label">ใช้งาน</div>
+        <pre>exiftool image.jpg          # ดู metadata ทั้งหมด
+exiftool -Comment image.jpg # ดูเฉพาะ comment
+exiftool -all= image.jpg    # ลบ metadata ทั้งหมด</pre>
+      </div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+
+  </div>
+
+  <div class="subsection" style="margin-top:20px">
+    <div class="subsection-title">📌 Stego Checklist</div>
+    <div class="tool-card">
+      <pre>1. exiftool / strings  → ดู metadata + printable strings
+2. Aperi'Solve         → one-click analysis (zsteg + steghide + binwalk)
+3. hexdump / xxd       → ดู magic bytes, file trailer
+4. binwalk -e          → extract embedded files
+5. zsteg -a            → LSB/MSB bit planes (PNG/BMP)
+6. steghide extract    → password-based embed (JPEG/WAV)
+7. stegseek            → brute-force steghide password
+8. Stegsolve           → bit plane viewer, combine images
+9. strings -n 6        → ค้นหา strings ยาว
+10. foremost           → data carving จาก binary stream</pre>
+    </div>
+  </div>
+
+</div><!-- /sec-stego -->
+
+<!-- WEB -->
+<div class="section" id="sec-web">
+  <div class="section-header">
+    <span class="section-icon">🕸️</span>
+    <div><div class="section-title">Web Exploitation</div>
+    <div class="section-desc">SQLi, XSS, LFI, SSRF, CSP bypass และเทคนิค web hacking</div></div>
+  </div>
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">PayloadsAllTheThings</span><a class="tool-link" href="https://github.com/swisskyrepo/PayloadsAllTheThings" target="_blank">🔗 GitHub</a></div>
+      <div class="tool-desc">รวม payloads ทุกเทคนิค web hacking — SQLi, XSS, SSRF, LFI, RCE, XXE, SSTI อ้างอิง first เสมอ</div>
+      <div class="tool-usage"><div class="tool-usage-label">LFI Payloads</div>
+<pre>../../../../etc/passwd
+....//....//etc/passwd
+php://filter/convert.base64-encode/resource=/etc/passwd
+data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWydjbWQnXSk7Pz4=</pre></div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">CSP Evaluator</span><a class="tool-link" href="https://csp-evaluator.withgoogle.com/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">วิเคราะห์ Content Security Policy header บอก weakness และ bypass possibilities</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">SQLMap</span><a class="tool-link" href="https://sqlmap.org/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Automatic SQL injection detection/exploitation — MySQL, PostgreSQL, SQLite, MSSQL</div>
+      <div class="tool-usage"><div class="tool-usage-label">ใช้งาน</div>
+<pre>sqlmap -u "http://target/?id=1" --dbs
+sqlmap -u "http://target/" --data="u=a&p=b" --dbs
+sqlmap -r request.txt --level=5 --risk=3
+sqlmap -u "..." -D db -T users --dump</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span><span class="tag tag-python">Python</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Burp Suite</span><a class="tool-link" href="https://portswigger.net/burp" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Web proxy intercept/modify HTTP — Repeater (manual test), Intruder (brute-force), Decoder</div>
+      <div class="tool-usage"><div class="tool-usage-label">Tips</div>
+<pre>Ctrl+R → send to Repeater
+Ctrl+I → send to Intruder
+Decoder tab: URL / HTML / Base64 / Hex</pre></div>
+      <div class="tool-tags"><span class="tag tag-java">Java</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Subdomain Finder</span><a class="tool-link" href="https://subdomainfinder.c99.nl/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">ค้นหา subdomain ที่ซ่อนอยู่รวมถึง wildcard และ dev/staging subdomains</div>
+      <div class="tool-usage"><div class="tool-usage-label">CLI</div>
+<pre>subfinder -d example.com
+gobuster dns -d example.com -w /usr/share/wordlists/dns.txt</pre></div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">JSONP Endpoints</span><a class="tool-link" href="https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt" target="_blank">🔗 GitHub</a></div>
+      <div class="tool-desc">รายการ JSONP endpoints ที่รู้จัก ใช้ bypass CSP ที่ whitelist domain เหล่านั้น</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Google Certificate Transparency</span><a class="tool-link" href="https://transparencyreport.google.com/https/certificates" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">ค้น SSL certificates ของ domain ช่วยหา subdomain ที่ไม่เปิดเผย</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+  </div>
+  <div class="subsection" style="margin-top:20px">
+    <div class="subsection-title">📌 Web CTF Checklist</div>
+    <div class="tool-card"><pre>1. robots.txt / /.git/ / /.env    → info leak
+2. View source + JS files          → hardcoded keys
+3. Cookie + jwt.io                 → tamper JWT
+4. SQLi: ' OR 1=1--                → sqlmap -r req.txt
+5. LFI: ../../../../etc/passwd     → php://filter
+6. SSTI: {{7*7}} / ${7*7}          → template injection
+7. SSRF: param รับ URL            → scan internal
+8. XXE / Command injection         → PayloadsAllTheThings</pre></div>
+  </div>
+</div>
+
+<!-- PWN -->
+<div class="section" id="sec-pwn">
+  <div class="section-header">
+    <span class="section-icon">🐛</span>
+    <div><div class="section-title">Pwn / Binary Exploitation</div>
+    <div class="section-desc">Buffer overflow, ROP chains, shellcode, binary analysis</div></div>
+  </div>
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">pwntools</span><a class="tool-link" href="https://docs.pwntools.com/" target="_blank">🔗 Docs</a></div>
+      <div class="tool-desc">Python library มาตรฐาน CTF pwn — process/remote, ROP chains, shellcraft, ELF parsing, format string</div>
+      <div class="tool-usage"><div class="tool-usage-label">Template พื้นฐาน</div>
+<pre>from pwn import *
+context.arch = 'amd64'
+p = process('./vuln')          # local
+p = remote('chall.ctf.com', 9001)
+elf = ELF('./vuln')
+rop = ROP(elf)
+rop.raw(rop.ret)               # stack alignment
+rop.call(elf.plt['puts'], [elf.got['puts']])
+p.sendline(flat({offset: rop.chain()}))
+p.interactive()</pre></div>
+      <div class="tool-tags"><span class="tag tag-python">Python</span><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">DogBolt / Decompiler Explorer</span><a class="tool-link" href="https://dogbolt.org/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Decompile binary ออนไลน์พร้อมกันด้วย Ghidra, BinaryNinja, angr, RetDec — เปรียบเทียบหลาย decompiler</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Syscall Reference</span><a class="tool-link" href="https://syscalls.w3challs.com/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">ตาราง Linux syscalls x86/x64 พร้อมค่า registers — ใช้เขียน shellcode</div>
+      <div class="tool-usage"><div class="tool-usage-label">x64 execve shellcode</div>
+<pre># rax=59, rdi=ptr"/bin/sh", rsi=0, rdx=0
+from pwn import *
+context.arch='amd64'
+print(enhex(asm(shellcraft.sh())))</pre></div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">LibC Database</span><a class="tool-link" href="https://libc.blukat.me/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">หา libc version จาก leaked address ของ function — ใช้ใน ret2libc attacks</div>
+      <div class="tool-usage"><div class="tool-usage-label">Workflow</div>
+<pre># 1. leak puts@got → ใส่ใน libc.blukat.me
+# 2. คำนวณ offset:
+from pwn import *
+libc = ELF('libc.so.6')
+sys = leaked_puts - libc.sym['puts'] + libc.sym['system']
+binsh = leaked_puts - libc.sym['puts'] + next(libc.search(b'/bin/sh'))</pre></div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span><span class="tag tag-python">Python</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">x86/x64 Online Assembler</span><a class="tool-link" href="https://defuse.ca/online-x86-assembler.htm" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">แปลง assembly ↔ hex bytes ออนไลน์ รองรับ x86 และ x64</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">BinaryNinja Cloud</span><a class="tool-link" href="https://cloud.binary.ninja/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Binary decompiler ออนไลน์ — Control Flow Graph, decompiled C, function list</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+  </div>
+  <div class="subsection" style="margin-top:20px">
+    <div class="subsection-title">📌 Pwn Checklist</div>
+    <div class="tool-card"><pre>1. checksec --file=./vuln     → NX/PIE/RELRO/Canary
+2. file ./vuln               → 32/64-bit, stripped?
+3. strings ./vuln            → hardcoded passwords/flags
+4. ltrace / strace ./vuln    → library/syscall trace
+5. gdb + pwndbg              → pattern create 200 → find offset
+6. ROPgadget --binary ./vuln → find ROP gadgets
+7. DogBolt / Ghidra          → decompile main logic
+8. No NX → shellcode | NX+no PIE → ret2plt/ret2libc</pre></div>
+  </div>
+</div>
+
+<!-- FORENSICS -->
+<div class="section" id="sec-forensics">
+  <div class="section-header">
+    <span class="section-icon">🕵️</span>
+    <div><div class="section-title">Forensics</div>
+    <div class="section-desc">File carving, memory forensics, disk imaging, metadata analysis</div></div>
+  </div>
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Forensically</span><a class="tool-link" href="https://29a.ch/photo-forensics/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Online forensic analysis — Error Level Analysis (ELA), noise analysis, luminance gradient, clone detection สำหรับตรวจรูปที่ถูกแก้ไข</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Autopsy</span><a class="tool-link" href="https://www.sleuthkit.org/autopsy/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">GUI forensic tool สำหรับวิเคราะห์ disk image — file recovery, timeline, keyword search, browser history</div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">foremost</span><a class="tool-link" href="https://tools.kali.org/forensics/foremost" target="_blank">🔗 Kali</a></div>
+      <div class="tool-desc">Data carving จาก disk image หรือ binary file โดยค้นหา magic bytes ของ JPEG, PNG, ZIP, PDF ฯลฯ</div>
+      <div class="tool-usage"><div class="tool-usage-label">ใช้งาน</div>
+<pre>foremost -i image.raw -o output/
+foremost -t jpg,png,zip -i file.bin -o out/
+# ดูผล
+ls out/audit.txt</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Volatility</span><a class="tool-link" href="https://www.volatilityfoundation.org/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Memory forensics framework — วิเคราะห์ RAM dump: processes, network connections, registry, passwords, injected code</div>
+      <div class="tool-usage"><div class="tool-usage-label">ใช้งาน (vol3)</div>
+<pre>vol -f mem.dmp windows.info
+vol -f mem.dmp windows.pslist
+vol -f mem.dmp windows.netscan
+vol -f mem.dmp windows.cmdline
+vol -f mem.dmp windows.filescan | grep flag
+vol -f mem.dmp windows.dumpfiles --virtaddr 0x...</pre></div>
+      <div class="tool-tags"><span class="tag tag-python">Python</span><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Wireshark / tshark</span><a class="tool-link" href="https://www.wireshark.org/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">วิเคราะห์ PCAP network traffic — ดู HTTP/DNS/FTP/SMTP protocol, export files, follow TCP stream</div>
+      <div class="tool-usage"><div class="tool-usage-label">tshark one-liners</div>
+<pre>tshark -r capture.pcap -Y "http" -T fields -e http.request.uri
+tshark -r capture.pcap --export-objects http,out/
+tshark -r capture.pcap -z io,phs -q   # protocol stats
+tshark -r capture.pcap -Y "dns" -T fields -e dns.qry.name</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">strings + xxd + binwalk</span><a class="tool-link" href="https://github.com/ReFirmLabs/binwalk" target="_blank">🔗 binwalk</a></div>
+      <div class="tool-desc">เครื่องมือพื้นฐาน — strings ค้น printable text, xxd dump hex, binwalk scan/extract embedded files</div>
+      <div class="tool-usage"><div class="tool-usage-label">ใช้งาน</div>
+<pre>strings -n 8 file.bin | grep -i flag
+xxd file.bin | head -50
+xxd -r hexdump.txt > output.bin   # reverse hex
+binwalk -e file.bin               # extract embedded
+file file.bin                     # identify type</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+  </div>
+  <div class="subsection" style="margin-top:20px">
+    <div class="subsection-title">📌 Forensics Checklist</div>
+    <div class="tool-card"><pre>1. file / xxd / strings       → ระบุประเภทและค้น text
+2. exiftool                   → metadata / EXIF
+3. binwalk -e                 → embedded files
+4. foremost / photorec        → file carving
+5. Wireshark → Follow Stream  → HTTP/FTP plaintext
+6. Volatility (RAM dump)      → processes, network, files
+7. Autopsy (disk image)       → timeline, deleted files
+8. strings -a -e l file.bin   → Unicode strings (Windows)</pre></div>
+  </div>
+</div>
+
+<!-- OSINT -->
+<div class="section" id="sec-osint">
+  <div class="section-header">
+    <span class="section-icon">🌐</span>
+    <div><div class="section-title">OSINT</div>
+    <div class="section-desc">Open Source Intelligence — ค้นหาข้อมูลจากแหล่งสาธารณะ</div></div>
+  </div>
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Wayback Machine</span><a class="tool-link" href="https://archive.org/web/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">ดู snapshot ของเว็บไซต์ในอดีต — ค้นหา version เก่าที่อาจเปิดเผยข้อมูล, source code, หรือ credentials</div>
+      <div class="tool-usage"><div class="tool-usage-label">ค้นหาผ่าน API</div>
+<pre>curl "http://archive.org/wayback/available?url=example.com"
+# ดู snapshots ทั้งหมด:
+curl "http://web.archive.org/cdx/search/cdx?url=example.com/*&output=list"</pre></div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Sherlock</span><a class="tool-link" href="https://github.com/sherlock-project/sherlock" target="_blank">🔗 GitHub</a></div>
+      <div class="tool-desc">ค้นหา social media accounts จาก username เดียวกันทั่วทุกแพลตฟอร์ม</div>
+      <div class="tool-usage"><div class="tool-usage-label">ใช้งาน</div>
+<pre>pip3 install sherlock-project
+sherlock username
+sherlock --timeout 5 --print-found username</pre></div>
+      <div class="tool-tags"><span class="tag tag-python">Python</span><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Epieos</span><a class="tool-link" href="https://epieos.com/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">ค้นหาข้อมูลที่เชื่อมกับ email address — Google account, social media, data breach</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">LinkedIn Email Finder</span><a class="tool-link" href="https://skrapp.io/tutorials/linkedin-email-finder" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Chrome extension หา email จาก LinkedIn profile</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Google Dorks</span><a class="tool-link" href="https://www.exploit-db.com/google-hacking-database" target="_blank">🔗 GHDB</a></div>
+      <div class="tool-desc">ค้นหาข้อมูลสำคัญผ่าน Google search operators</div>
+      <div class="tool-usage"><div class="tool-usage-label">Useful dorks</div>
+<pre>site:example.com filetype:pdf
+site:example.com inurl:admin
+intitle:"index of" "password"
+intext:"api_key" site:github.com
+site:pastebin.com "example.com" password</pre></div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">ExifTool (OSINT)</span><a class="tool-link" href="https://exiftool.org/" target="_blank">🔗 Docs</a></div>
+      <div class="tool-desc">ดู GPS coordinates จากรูปภาพ — latitude/longitude ซ่อนอยู่ใน EXIF</div>
+      <div class="tool-usage"><div class="tool-usage-label">ดู GPS</div>
+<pre>exiftool -GPS* image.jpg
+exiftool -n -GPSLatitude -GPSLongitude image.jpg
+# แล้วนำค่าไปค้นใน Google Maps</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- REVERSING -->
+<div class="section" id="sec-reversing">
+  <div class="section-header">
+    <span class="section-icon">↩️</span>
+    <div><div class="section-title">Reverse Engineering</div>
+    <div class="section-desc">Decompile, disassemble, analyze executables และ APKs</div></div>
+  </div>
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Ghidra</span><a class="tool-link" href="https://ghidra-sre.org/" target="_blank">🔗 Download</a></div>
+      <div class="tool-desc">Free reverse engineering tool จาก NSA — decompile ไปเป็น C-like code, ดู disassembly, function analysis, cross-references</div>
+      <div class="tool-usage"><div class="tool-usage-label">Tips</div>
+<pre># ค้นหา strings ใน Defined Strings window
+# ใช้ Ctrl+F ค้น function
+# ดู xrefs ด้วย Ctrl+Shift+F
+# Script: Find flag patterns:
+import re
+memory = getCurrentProgram().getMemory()
+# ใช้ Search > Memory สำหรับค้น bytes</pre></div>
+      <div class="tool-tags"><span class="tag tag-java">Java</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">DogBolt</span><a class="tool-link" href="https://dogbolt.org/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Upload binary → decompile พร้อมกันด้วย Ghidra, BinaryNinja, angr, Hex-Rays — เลือกผลที่อ่านง่ายที่สุด</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">JADX (Android)</span><a class="tool-link" href="https://github.com/skylot/jadx" target="_blank">🔗 GitHub</a></div>
+      <div class="tool-desc">Decompile APK → Java source code — ดู classes, string constants, AndroidManifest, ค้น API keys ที่ hardcode</div>
+      <div class="tool-usage"><div class="tool-usage-label">ใช้งาน</div>
+<pre>jadx -d output/ app.apk
+jadx-gui app.apk          # GUI mode
+# ค้นหา:
+grep -r "flag\|password\|secret\|api_key" output/</pre></div>
+      <div class="tool-tags"><span class="tag tag-java">Java</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Online Java Decompiler</span><a class="tool-link" href="http://www.javadecompilers.com/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Decompile Java .class, .jar, APK ออนไลน์ — ไม่ต้องติดตั้งอะไร</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">pyinstxtractor</span><a class="tool-link" href="https://github.com/extremecoders-re/pyinstxtractor" target="_blank">🔗 GitHub</a></div>
+      <div class="tool-desc">Extract Python bytecode จาก PyInstaller executable (.exe) แล้วใช้ uncompyle6/pycdc decompile กลับเป็น .py</div>
+      <div class="tool-usage"><div class="tool-usage-label">Workflow</div>
+<pre>python3 pyinstxtractor.py chall.exe
+# output: chall.exe_extracted/
+# หา .pyc ที่ชื่อเหมือน exe
+cd chall.exe_extracted/
+uncompyle6 chall.pyc > chall.py
+# หรือใช้ pycdc:
+pycdc chall.pyc</pre></div>
+      <div class="tool-tags"><span class="tag tag-python">Python</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">MobSF</span><a class="tool-link" href="https://github.com/MobSF/Mobile-Security-Framework-MobSF" target="_blank">🔗 GitHub</a></div>
+      <div class="tool-desc">Automated APK/IPA security analysis — decompile, static analysis, secret scanning, permission analysis</div>
+      <div class="tool-usage"><div class="tool-usage-label">Run with Docker</div>
+<pre>docker run -it -p 8000:8000 opensecurity/mobile-security-framework-mobsf
+# เปิด http://localhost:8000 แล้ว upload APK</pre></div>
+      <div class="tool-tags"><span class="tag tag-python">Python</span></div>
+    </div>
+  </div>
+  <div class="subsection" style="margin-top:20px">
+    <div class="subsection-title">📌 Reversing Checklist</div>
+    <div class="tool-card"><pre>1. file / strings            → ระบุประเภท, ค้น hardcoded
+2. ltrace / strace           → trace function calls
+3. Ghidra / DogBolt          → decompile logic
+4. gdb + ni/si               → step through instructions
+5. Python exe: pyinstxtractor → uncompyle6/pycdc
+6. APK: jadx / MobSF         → Java source + manifest
+7. .NET: ILSpy / dotPeek     → C# source code
+8. upx -d binary             → unpack UPX packed binary</pre></div>
+  </div>
+</div>
+
+<!-- NETWORK -->
+<div class="section" id="sec-network">
+  <div class="section-header">
+    <span class="section-icon">📡</span>
+    <div><div class="section-title">Network Forensics</div>
+    <div class="section-desc">PCAP analysis, protocol dissection, traffic reconstruction</div></div>
+  </div>
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Wireshark</span><a class="tool-link" href="https://www.wireshark.org/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">GUI packet analyzer — filter, follow streams, export objects (HTTP/FTP/SMB), decode protocols</div>
+      <div class="tool-usage"><div class="tool-usage-label">Display Filters ที่ใช้บ่อย</div>
+<pre>http                          # HTTP traffic ทั้งหมด
+http.request.method == "POST" # POST requests
+tcp.stream eq 0               # TCP stream แรก
+dns                           # DNS queries
+ftp-data                      # FTP file transfers
+frame contains "flag"         # ค้น keyword ใน packets
+ip.src == 192.168.1.1         # source IP</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">tshark</span><a class="tool-link" href="https://www.wireshark.org/docs/man-pages/tshark.html" target="_blank">🔗 Docs</a></div>
+      <div class="tool-desc">CLI version ของ Wireshark — batch analysis, extract fields, export objects</div>
+      <div class="tool-usage"><div class="tool-usage-label">One-liners</div>
+<pre># ดู HTTP URIs
+tshark -r cap.pcap -Y http -T fields -e http.request.uri
+# export HTTP objects
+tshark -r cap.pcap --export-objects http,./out/
+# ดู DNS queries
+tshark -r cap.pcap -Y dns -T fields -e dns.qry.name
+# ดู credentials (FTP/HTTP Basic)
+tshark -r cap.pcap -Y ftp -T fields -e ftp.request.command -e ftp.request.arg
+# TCP stream เป็น text
+tshark -r cap.pcap -q -z follow,tcp,ascii,0</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">NetworkMiner</span><a class="tool-link" href="https://www.netresec.com/?page=NetworkMiner" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Passive network sniffer/analyzer ที่ดีมาก — auto-extract files จาก PCAP, ดู sessions, credentials, DNS</div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Scapy</span><a class="tool-link" href="https://scapy.net/" target="_blank">🔗 Docs</a></div>
+      <div class="tool-desc">Python library สร้าง/parse/send packets — ใช้วิเคราะห์ PCAP, craft custom packets, implement protocols</div>
+      <div class="tool-usage"><div class="tool-usage-label">Parse PCAP</div>
+<pre>from scapy.all import *
+pkts = rdpcap('capture.pcap')
+for pkt in pkts:
+    if pkt.haslayer(Raw):
+        print(pkt[Raw].load)
+    if pkt.haslayer(DNS):
+        print(pkt[DNS].qd.qname)</pre></div>
+      <div class="tool-tags"><span class="tag tag-python">Python</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">nmap</span><a class="tool-link" href="https://nmap.org/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">Network scanner — ค้นหา open ports, services, OS detection, vulnerability scripts</div>
+      <div class="tool-usage"><div class="tool-usage-label">Common scans</div>
+<pre>nmap -sV -sC -p- target.com     # full scan + scripts
+nmap -sV --script vuln target   # vuln scan
+nmap -p 80,443,8080 target      # specific ports
+nmap -A -T4 192.168.1.0/24      # aggressive subnet</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MISC -->
+<div class="section" id="sec-misc">
+  <div class="section-header">
+    <span class="section-icon">🔧</span>
+    <div><div class="section-title">Misc &amp; General Tips</div>
+    <div class="section-desc">เทคนิค, one-liners, และเครื่องมือที่ใช้ข้ามหลาย category</div></div>
+  </div>
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Base Encodings Cheatsheet</span></div>
+      <div class="tool-desc">Encoding ที่เจอบ่อยใน CTF</div>
+      <div class="tool-usage"><div class="tool-usage-label">Python decode all</div>
+<pre>import base64, binascii
+s = "SGVsbG8="
+base64.b64decode(s)                    # Base64
+base64.b32decode(s)                    # Base32
+base64.b16decode(s)                    # Base16 (Hex)
+base64.b85decode(s)                    # Base85
+bytes.fromhex("48656c6c6f")            # Hex
+binascii.a2b_uu(s)                     # UUencoding
+# ลอง CyberChef "Magic" recipe อัตโนมัติ</pre></div>
+      <div class="tool-tags"><span class="tag tag-python">Python</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Flag Format Quick Reference</span></div>
+      <div class="tool-desc">Format ของ flag ที่ใช้บ่อยในแต่ละ CTF</div>
+      <div class="tool-usage"><div class="tool-usage-label">Patterns</div>
+<pre>picoCTF{...}     HTB{...}       CTF{...}
+flag{...}        FLAG{...}      DUCTF{...}
+# MD5-style: 32 hex chars = d8e8fca2dc0f896fd7cb4cb0031ba249
+# grep ค้นหา:
+grep -rP "(flag|ctf|picoCTF)\{[^}]+\}" .
+strings file | grep -iP "flag|ctf{|\w{32}"</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Python Crypto Snippets</span></div>
+      <div class="tool-desc">One-liners ที่ใช้บ่อยมากใน CTF</div>
+      <div class="tool-usage"><div class="tool-usage-label">Common operations</div>
+<pre># bytes ↔ int
+n = int.from_bytes(b'flag', 'big')
+b = n.to_bytes((n.bit_length()+7)//8, 'big')
+
+# XOR bruteforce single byte
+ct = bytes.fromhex("1b3b2b")
+for k in range(256):
+    pt = bytes([b^k for b in ct])
+    if pt.isascii(): print(k, pt)
+
+# Modular inverse
+from math import gcd
+def modinv(a, m):
+    g, x, _ = extended_gcd(a, m)
+    return x % m
+
+# ROT bruteforce
+for i in range(26):
+    print(i, ''.join(chr((ord(c)-65+i)%26+65) if c.isupper() else c for c in ciphertext))</pre></div>
+      <div class="tool-tags"><span class="tag tag-python">Python</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Linux Privilege Escalation</span></div>
+      <div class="tool-desc">เทคนิค privesc ที่เจอบ่อยใน CTF</div>
+      <div class="tool-usage"><div class="tool-usage-label">Quick checks</div>
+<pre>sudo -l                      # sudo permissions
+find / -perm -4000 2>/dev/null  # SUID binaries
+cat /etc/crontab             # cron jobs
+env                          # environment variables
+cat /etc/passwd              # users
+ss -tlnp                     # listening services
+# GTFOBins: https://gtfobins.github.io/
+# ค้น SUID binary ที่สามารถ abuse ได้</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">GTFOBins</span><a class="tool-link" href="https://gtfobins.github.io/" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">รายการ Unix binaries ที่ใช้ bypass security restrictions ได้ — sudo, SUID, capabilities, file write/read, shell escape</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">john + hashcat</span><a class="tool-link" href="https://hashcat.net/hashcat/" target="_blank">🔗 hashcat</a></div>
+      <div class="tool-desc">Password cracking — john สำหรับ format หลากหลาย, hashcat สำหรับ GPU-accelerated cracking</div>
+      <div class="tool-usage"><div class="tool-usage-label">Common commands</div>
+<pre># john
+john --wordlist=rockyou.txt hash.txt
+john --format=md5 hash.txt
+zip2john/ssh2john/pdf2john → hash.txt
+# hashcat
+hashcat -m 0    hash.txt rockyou.txt  # MD5
+hashcat -m 1000 hash.txt rockyou.txt  # NTLM
+hashcat -m 1800 hash.txt rockyou.txt  # sha512crypt
+hashcat -m 3200 hash.txt rockyou.txt  # bcrypt</pre></div>
+      <div class="tool-tags"><span class="tag tag-cli">CLI</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">CyberChef Magic</span><a class="tool-link" href="https://gchq.github.io/CyberChef/#recipe=Magic(3,false,false,'')" target="_blank">🔗 เปิด</a></div>
+      <div class="tool-desc">CyberChef "Magic" operation — ลอง decode/decrypt อัตโนมัติหลาย layer พร้อมกัน ใส่ ciphertext แล้วให้มัน detect เอง</div>
+      <div class="tool-tags"><span class="tag tag-online">Online</span></div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-card-top"><span class="tool-name">Audio Stego (WAV/MP3)</span></div>
+      <div class="tool-desc">เทคนิคซ่อนข้อมูลในไฟล์เสียง</div>
+      <div class="tool-usage"><div class="tool-usage-label">Tools &amp; techniques</div>
+<pre># Spectrogram analysis (ดู hidden image ใน spectrum):
+sox audio.wav -n spectrogram -o spec.png
+# หรือใช้ Sonic Visualiser / Audacity
+# LSB audio stego:
+python3 -c "
+import wave, struct
+w = wave.open('audio.wav')
+frames = w.readframes(w.getnframes())
+samples = struct.unpack('<'+'h'*w.getnframes(), frames)
+lsbs = ''.join(str(s&1) for s in samples[:100])
+print(lsbs)
+"
+# DTMF decoder: http://dialabc.com/sound/detect/</pre></div>
+      <div class="tool-tags"><span class="tag tag-python">Python</span><span class="tag tag-cli">CLI</span></div>
+    </div>
+  </div>
+</div>
+
+
+</div><!-- end all-sections -->
+
+<div id="search-results">
+  <div class="page-header"><h2>🔍 ผลการค้นหา</h2><p id="search-count"></p></div>
+  <div id="search-list"></div>
+</div>
+
+</main>
+</div><!-- #app -->
+<button id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const TOOL_DATA=[];
+document.querySelectorAll('.tool-card').forEach(card=>{
+  const sec=card.closest('.section');
+  TOOL_DATA.push({
+    name:card.querySelector('.tool-name')?.textContent||'',
+    desc:card.querySelector('.tool-desc')?.textContent||'',
+    usage:card.querySelector('.tool-usage')?.textContent||'',
+    secTitle:sec?.querySelector('.section-title')?.textContent||'',
+    link:card.querySelector('.tool-link')?.href||'',
+    el:card
+  });
+});
+
+function showSection(id){
+  document.getElementById('all-sections').style.display='';
+  document.getElementById('search-results').style.display='none';
+  document.getElementById('search-box').value='';
+  document.querySelectorAll('.nav-item').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('onclick')===`showSection('${id}')`);
+  });
+  if(id==='all'){
+    document.querySelectorAll('.section').forEach(s=>s.style.display='');
+  } else {
+    document.querySelectorAll('.section').forEach(s=>{
+      s.style.display = s.id==='sec-'+id ? '' : 'none';
+    });
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+const sb=document.getElementById('search-box');
+sb.addEventListener('input',()=>{
+  const q=sb.value.trim().toLowerCase();
+  const allSec=document.getElementById('all-sections');
+  const sr=document.getElementById('search-results');
+  if(!q){
+    sr.style.display='none'; allSec.style.display='';
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+    return;
+  }
+  allSec.style.display='none'; sr.style.display='';
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const hits=TOOL_DATA.filter(t=>
+    t.name.toLowerCase().includes(q)||t.desc.toLowerCase().includes(q)||t.usage.toLowerCase().includes(q)
+  );
+  document.getElementById('search-count').textContent=`พบ ${hits.length} รายการ สำหรับ "${sb.value}"`;
+  const hl=str=>str.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),m=>`<mark>${m}</mark>`);
+  document.getElementById('search-list').innerHTML = hits.length===0
+    ? '<div style="color:var(--muted);padding:20px">ไม่พบเครื่องมือที่ตรงกัน</div>'
+    : hits.map(t=>`<div class="search-result-item tool-card">
+        <div class="tool-card-top"><span class="tool-name">${hl(t.name)}</span>
+        ${t.link?`<a class="tool-link" href="${t.link}" target="_blank">🔗 เปิด</a>`:''}</div>
+        <div class="search-result-cat">📁 ${t.secTitle}</div>
+        <div class="tool-desc">${hl(t.desc)}</div></div>`).join('');
+});
+
+const bt=document.getElementById('back-top');
+window.addEventListener('scroll',()=>bt.classList.toggle('visible',window.scrollY>400));
+
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();sb.focus();sb.select();}
+  if(e.key==='Escape'){sb.value='';sb.dispatchEvent(new Event('input'));sb.blur();}
+});
+
+showSection('all');
+</script>
+</body>
+</html>

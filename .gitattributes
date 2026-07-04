@@ -1,0 +1,17 @@
+* text=auto
+
+*.html text eol=lf
+*.bak text eol=lf
+*.txt text eol=lf
+
+*.bin binary
+*.docm binary
+*.evtx binary
+*.jpg binary
+*.jpeg binary
+*.pcap binary
+*.pcapng binary
+*.pdf binary
+*.png binary
+*.tar binary
+*.wav binary
