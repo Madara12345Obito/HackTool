@@ -41,8 +41,127 @@ function Send-Response {
   }
 }
 
+function Find-HeaderEnd {
+  param([byte[]]$Bytes)
+  for ($i = 0; $i -le $Bytes.Length - 4; $i++) {
+    if ($Bytes[$i] -eq 13 -and $Bytes[$i + 1] -eq 10 -and $Bytes[$i + 2] -eq 13 -and $Bytes[$i + 3] -eq 10) {
+      return $i
+    }
+  }
+  return -1
+}
+
+function Read-HttpRequest {
+  param([System.Net.Sockets.NetworkStream]$Stream)
+  $memory = [System.IO.MemoryStream]::new()
+  $buffer = New-Object byte[] 4096
+  $headerEnd = -1
+
+  while ($headerEnd -lt 0) {
+    $read = $Stream.Read($buffer, 0, $buffer.Length)
+    if ($read -le 0) { break }
+    $memory.Write($buffer, 0, $read)
+    if ($memory.Length -gt 65536) { throw 'Request headers too large' }
+    $headerEnd = Find-HeaderEnd $memory.ToArray()
+  }
+
+  if ($headerEnd -lt 0) { return $null }
+
+  $rawBytes = $memory.ToArray()
+  $headerText = [System.Text.Encoding]::ASCII.GetString($rawBytes, 0, $headerEnd)
+  $headerLines = $headerText -split "`r`n"
+  if (-not $headerLines.Length) { return $null }
+
+  $requestParts = $headerLines[0].Split(' ', 3, [System.StringSplitOptions]::RemoveEmptyEntries)
+  if ($requestParts.Length -lt 2) { return $null }
+
+  $headers = @{}
+  $contentLength = 0
+  for ($i = 1; $i -lt $headerLines.Length; $i++) {
+    $line = $headerLines[$i]
+    $colon = $line.IndexOf(':')
+    if ($colon -le 0) { continue }
+    $name = $line.Substring(0, $colon).Trim()
+    $value = $line.Substring($colon + 1).Trim()
+    $headers[$name] = $value
+    if ($name -ieq 'Content-Length') {
+      [int]::TryParse($value, [ref]$contentLength) | Out-Null
+    }
+  }
+
+  $body = New-Object byte[] 0
+  if ($contentLength -gt 0) {
+    if ($contentLength -gt 5242880) { throw 'Request body too large' }
+    $body = New-Object byte[] $contentLength
+    $bodyStart = $headerEnd + 4
+    $alreadyBuffered = [Math]::Max(0, $rawBytes.Length - $bodyStart)
+    $copied = [Math]::Min($alreadyBuffered, $contentLength)
+    if ($copied -gt 0) {
+      [Array]::Copy($rawBytes, $bodyStart, $body, 0, $copied)
+    }
+    while ($copied -lt $contentLength) {
+      $read = $Stream.Read($body, $copied, $contentLength - $copied)
+      if ($read -le 0) { break }
+      $copied += $read
+    }
+    if ($copied -lt $contentLength) { throw 'Incomplete request body' }
+  }
+
+  [pscustomobject]@{
+    Method = $requestParts[0].ToUpperInvariant()
+    Target = $requestParts[1]
+    Headers = $headers
+    Body = $body
+  }
+}
+
 $rootFull = [System.IO.Path]::GetFullPath($Root)
 $rootBoundary = $rootFull.TrimEnd('\') + '\'
+$sharedStorePath = Join-Path $rootFull 'output\shared-editor-store.json'
+$defaultSharedStore = '{"version":1,"edits":{},"deleted":[],"custom":[]}'
+
+function Read-SharedStore {
+  if (Test-Path -LiteralPath $sharedStorePath -PathType Leaf) {
+    $text = [System.IO.File]::ReadAllText($sharedStorePath, [System.Text.Encoding]::UTF8).Trim()
+    if (-not [string]::IsNullOrWhiteSpace($text)) { return $text }
+  }
+  return $defaultSharedStore
+}
+
+function Write-SharedStore {
+  param([string]$Json)
+  $dir = Split-Path -Parent $sharedStorePath
+  New-Item -ItemType Directory -Force -Path $dir | Out-Null
+  [System.IO.File]::WriteAllText($sharedStorePath, $Json, [System.Text.UTF8Encoding]::new($false))
+}
+
+function Handle-EditorStoreApi {
+  param(
+    [System.Net.Sockets.NetworkStream]$Stream,
+    $Request,
+    [bool]$HeadOnly
+  )
+  if ($Request.Method -eq 'GET' -or $Request.Method -eq 'HEAD') {
+    Send-Response $Stream '200 OK' ([System.Text.Encoding]::UTF8.GetBytes((Read-SharedStore))) 'application/json; charset=utf-8' $HeadOnly
+    return
+  }
+  if ($Request.Method -eq 'POST') {
+    $json = [System.Text.Encoding]::UTF8.GetString($Request.Body).Trim()
+    if ([string]::IsNullOrWhiteSpace($json)) {
+      Send-Response $Stream '400 Bad Request' ([System.Text.Encoding]::UTF8.GetBytes('Empty body'))
+      return
+    }
+    try {
+      $null = $json | ConvertFrom-Json
+      Write-SharedStore $json
+      Send-Response $Stream '200 OK' ([System.Text.Encoding]::UTF8.GetBytes('{"ok":true}')) 'application/json; charset=utf-8'
+    } catch {
+      Send-Response $Stream '400 Bad Request' ([System.Text.Encoding]::UTF8.GetBytes('Invalid JSON'))
+    }
+    return
+  }
+  Send-Response $Stream '405 Method Not Allowed' ([System.Text.Encoding]::UTF8.GetBytes('Method not allowed')) -HeadOnly $HeadOnly
+}
 
 $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Any, $Port)
 $listener.Start()
@@ -66,23 +185,24 @@ try {
     $client = $listener.AcceptTcpClient()
     try {
       $stream = $client.GetStream()
-      $reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::ASCII, $false, 8192, $true)
-      $requestLine = $reader.ReadLine()
-      if ([string]::IsNullOrWhiteSpace($requestLine)) { continue }
+      $request = Read-HttpRequest $stream
+      if ($null -eq $request) { continue }
 
-      while (($line = $reader.ReadLine()) -ne $null -and $line -ne '') {}
-
-      $parts = $requestLine.Split(' ')
-      $method = $parts[0]
-      $target = if ($parts.Length -gt 1) { $parts[1] } else { '/' }
+      $method = $request.Method
+      $target = if ($request.Target) { $request.Target } else { '/' }
       $headOnly = $method -eq 'HEAD'
 
-      if ($method -ne 'GET' -and $method -ne 'HEAD') {
-        Send-Response $stream '405 Method Not Allowed' ([System.Text.Encoding]::UTF8.GetBytes('Method not allowed'))
+      $urlPath = ($target -split '\?')[0]
+      if ($urlPath -ieq '/api/editor-store') {
+        Handle-EditorStoreApi $stream $request $headOnly
         continue
       }
 
-      $urlPath = ($target -split '\?')[0]
+      if ($method -ne 'GET' -and $method -ne 'HEAD') {
+        Send-Response $stream '405 Method Not Allowed' ([System.Text.Encoding]::UTF8.GetBytes('Method not allowed')) -HeadOnly $headOnly
+        continue
+      }
+
       if ([string]::IsNullOrWhiteSpace($urlPath) -or $urlPath -eq '/') {
         $urlPath = '/index.html'
       }

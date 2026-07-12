@@ -122,6 +122,9 @@ mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1
 .editor-btn:hover,.editor-file:hover{border-color:var(--blue);color:#fff}
 .editor-btn.primary{background:rgba(91,141,238,.16);border-color:rgba(91,141,238,.4);color:#cfe0ff}
 .editor-btn.danger{background:rgba(255,92,122,.12);border-color:rgba(255,92,122,.35);color:#ff9bac}
+.editor-sync-status{display:inline-flex;align-items:center;min-height:30px;padding:0 9px;border:1px solid var(--border);border-radius:7px;background:var(--bg2);color:var(--muted);font-size:10.5px}
+.editor-sync-status.on{border-color:rgba(62,207,116,.35);color:#8ee9ad;background:rgba(62,207,116,.08)}
+.editor-sync-status.warn{border-color:rgba(245,200,66,.35);color:#f1d47a;background:rgba(245,200,66,.08)}
 .editor-file input{display:none}
 .editor-card-actions{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
 .editor-mini-btn{font-size:10px;color:var(--muted);background:var(--bg3);padding:3px 7px;border-radius:5px;flex-shrink:0;transition:all .15s;cursor:pointer;border:1px solid var(--border);font-family:inherit}
@@ -202,6 +205,7 @@ mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1
       <button type="button" class="editor-btn" onclick="exportEditorData()">Export edits</button>
       <label class="editor-file">Import edits<input type="file" accept="application/json,.json" onchange="importEditorData(this)"></label>
       <button type="button" class="editor-btn danger" onclick="resetEditorData()">Reset edits</button>
+      <span id="editor-sync-status" class="editor-sync-status">Local only</span>
     </div>
     <div class="mobile-actions" aria-label="Mobile filters">
       <input id="mobile-search" class="search-input" placeholder="🔍 ค้นหา..." autocomplete="off" aria-label="ค้นหาเครื่องมือบนมือถือ">
@@ -8732,9 +8736,12 @@ tips:['CSRF ใช้ได้กับ state-changing action ที่ไม่
 // source as a recoverable backup, while the visible Knowledge cards stay concise.
 TOOLS = TOOLS.filter(t => !t.archive);
 
-// Local editor data lives in the browser so every category/tool can be
-// edited without rewriting this large static reference file each time.
 const EDITOR_STORE_KEY = 'ctf-tools-web2-editor-v2';
+const SHARED_EDITOR_STORE_URL = 'api/editor-store';
+let SHARED_EDITOR_READY = false;
+let SHARED_EDITOR_PUSHING = false;
+let SHARED_EDITOR_POLL = null;
+let SHARED_EDITOR_LAST_SIGNATURE = '';
 
 function cloneToolValue(value){
   return JSON.parse(JSON.stringify(value));
@@ -8873,8 +8880,120 @@ function readEditorStore(){
   }
 }
 
+function writeEditorStoreLocal(store){
+  localStorage.setItem(EDITOR_STORE_KEY, JSON.stringify(normalizeEditorStore(store)));
+}
+
 function saveEditorStore(){
-  localStorage.setItem(EDITOR_STORE_KEY, JSON.stringify(TOOL_STORE));
+  writeEditorStoreLocal(TOOL_STORE);
+  queueSharedEditorStorePush();
+}
+
+function editorSyncStatusEl(){
+  return document.getElementById('editor-sync-status');
+}
+
+function setEditorSyncStatus(text, mode){
+  const el = editorSyncStatusEl();
+  if(!el) return;
+  el.classList.remove('on','warn');
+  if(mode) el.classList.add(mode);
+  el.textContent = text;
+}
+
+function editorSyncEnabled(){
+  return location.protocol === 'http:' || location.protocol === 'https:';
+}
+
+function editorStoreSignature(store){
+  try{
+    return JSON.stringify(normalizeEditorStore(store || defaultEditorStore()));
+  }catch(err){
+    return '';
+  }
+}
+
+function mergeEditorStores(baseStore, incomingStore){
+  const base = normalizeEditorStore(baseStore || defaultEditorStore());
+  const incoming = normalizeEditorStore(incomingStore || defaultEditorStore());
+  const merged = defaultEditorStore();
+  merged.edits = Object.assign({}, base.edits, incoming.edits);
+  merged.deleted = [...new Set([...(base.deleted || []), ...(incoming.deleted || [])])];
+  const customById = {};
+  (base.custom || []).forEach(tool => { customById[tool.id] = tool; });
+  (incoming.custom || []).forEach(tool => { customById[tool.id] = tool; });
+  merged.custom = Object.keys(customById).map(id => customById[id]);
+  return normalizeEditorStore(merged);
+}
+
+async function loadSharedEditorStore(){
+  if(!editorSyncEnabled()){
+    setEditorSyncStatus('Local only', 'warn');
+    return;
+  }
+  try{
+    const resp = await fetch(SHARED_EDITOR_STORE_URL, {cache:'no-store'});
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const parsed = await resp.json();
+    const remote = normalizeEditorStore(parsed.store || parsed);
+    const remoteSignature = editorStoreSignature(remote);
+    if(!remoteSignature){
+      setEditorSyncStatus('Shared empty', 'warn');
+      SHARED_EDITOR_READY = true;
+      return;
+    }
+
+    const local = normalizeEditorStore(TOOL_STORE);
+    const localSignature = editorStoreSignature(local);
+    const defaultSignature = editorStoreSignature(defaultEditorStore());
+    if(remoteSignature === defaultSignature && localSignature !== defaultSignature){
+      TOOL_STORE = local;
+      SHARED_EDITOR_READY = true;
+      SHARED_EDITOR_LAST_SIGNATURE = remoteSignature;
+      queueSharedEditorStorePush();
+    }else if(localSignature !== remoteSignature){
+      TOOL_STORE = remote;
+      writeEditorStoreLocal(TOOL_STORE);
+      refreshToolView();
+    }
+    SHARED_EDITOR_LAST_SIGNATURE = editorStoreSignature(TOOL_STORE);
+    SHARED_EDITOR_READY = true;
+    setEditorSyncStatus('Shared sync on', 'on');
+  }catch(err){
+    SHARED_EDITOR_READY = false;
+    setEditorSyncStatus('Local only', 'warn');
+  }
+}
+
+function queueSharedEditorStorePush(){
+  if(!SHARED_EDITOR_READY || !editorSyncEnabled()) return;
+  if(SHARED_EDITOR_PUSHING) return;
+  const signature = editorStoreSignature(TOOL_STORE);
+  if(signature === SHARED_EDITOR_LAST_SIGNATURE) return;
+  SHARED_EDITOR_LAST_SIGNATURE = signature;
+  SHARED_EDITOR_PUSHING = true;
+  fetch(SHARED_EDITOR_STORE_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(TOOL_STORE)
+  }).then(resp => {
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    setEditorSyncStatus('Shared saved', 'on');
+  }).catch(err => {
+    setEditorSyncStatus('Save pending', 'warn');
+  }).finally(() => {
+    SHARED_EDITOR_PUSHING = false;
+  });
+}
+
+function startSharedEditorPolling(){
+  if(!editorSyncEnabled()) return;
+  if(SHARED_EDITOR_POLL) clearInterval(SHARED_EDITOR_POLL);
+  SHARED_EDITOR_POLL = setInterval(() => {
+    const modal = document.getElementById('editor-modal');
+    if(modal && modal.classList.contains('open')) return;
+    loadSharedEditorStore();
+  }, 5000);
 }
 
 function applyEditorStore(){
@@ -9015,9 +9134,9 @@ function restoreOriginalTool(){
 }
 
 function resetEditorData(){
-  if(!confirm('ลบ edits/custom tools ทั้งหมดที่เก็บใน browser นี้?')) return;
-  localStorage.removeItem(EDITOR_STORE_KEY);
+  if(!confirm('ลบ edits/custom tools ทั้งหมดที่ใช้ร่วมกันบน server นี้? เครื่องอื่นที่เปิด URL เดียวกันจะถูก reset ด้วย')) return;
   TOOL_STORE = defaultEditorStore();
+  saveEditorStore();
   closeToolEditor();
   refreshToolView();
 }
@@ -9408,6 +9527,7 @@ buildSidebar();
 buildSections();
 bindControls();
 showCat('all');
+loadSharedEditorStore().then(startSharedEditorPolling);
 </script>
 </body>
 </html>
