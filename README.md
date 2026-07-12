@@ -6,19 +6,8 @@ Static single-page CTF tools reference for GitHub Pages.
 
 - `index.html` redirects visitors to the main page.
 - `ctf_tools.html` is the full web app.
-- `data/editor-store.json` is the shared GitHub cloud store for edits/blogs.
 - `.nojekyll` keeps GitHub Pages from filtering static files.
 - `.github/workflows/static.yml` deploys the site with GitHub Actions.
-
-## Cloud editing
-
-The web app can read shared edits from GitHub automatically. To save edits back to the cloud, open `GitHub Cloud` in the web app and enter a GitHub token that has `Contents: Read and write` permission for this repository.
-
-Edits are saved to:
-
-```text
-data/editor-store.json
-```
 
 ## GitHub Pages hosting
 
