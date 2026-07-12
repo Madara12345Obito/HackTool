@@ -103,7 +103,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .doc-section{margin-bottom:14px}
 .doc-section h4{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px}
 .doc-section h4::after{content:'';flex:1;height:1px;background:var(--border)}
-.doc-p{font-size:12px;color:var(--text);opacity:.85;line-height:1.6;margin-bottom:6px}
+.doc-p{font-size:12px;color:var(--text);opacity:.85;line-height:1.6;margin-bottom:6px;white-space:pre-wrap}
 .tip-box{background:rgba(91,141,238,.07);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:7px 10px;font-size:11.5px;color:#8ba8e8;margin:6px 0}
 .warn-box{background:rgba(255,140,66,.07);border-left:3px solid var(--orange);border-radius:0 6px 6px 0;padding:7px 10px;font-size:11.5px;color:#e8a878;margin:6px 0}
 .checklist{list-style:none;padding:0}
@@ -115,6 +115,36 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 #search-results{display:none}
 .sr-cat-badge{display:inline-block;font-size:9px;padding:1px 7px;border-radius:99px;margin-bottom:5px;background:var(--bg4);color:var(--muted)}
 mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1px}
+
+/* editor */
+.editor-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.editor-btn,.editor-file{border:1px solid var(--border2);background:var(--bg3);color:var(--text);border-radius:7px;padding:6px 10px;font:inherit;font-size:11.5px;cursor:pointer;transition:.14s;text-decoration:none}
+.editor-btn:hover,.editor-file:hover{border-color:var(--blue);color:#fff}
+.editor-btn.primary{background:rgba(91,141,238,.16);border-color:rgba(91,141,238,.4);color:#cfe0ff}
+.editor-btn.danger{background:rgba(255,92,122,.12);border-color:rgba(255,92,122,.35);color:#ff9bac}
+.editor-file input{display:none}
+.editor-card-actions{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.editor-mini-btn{font-size:10px;color:var(--muted);background:var(--bg3);padding:3px 7px;border-radius:5px;flex-shrink:0;transition:all .15s;cursor:pointer;border:1px solid var(--border);font-family:inherit}
+.editor-mini-btn:hover{border-color:var(--border2);color:var(--text)}
+.editor-mini-btn.danger:hover{border-color:var(--red);color:#ffc7d0}
+.editor-modal{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:center;justify-content:center;padding:18px;z-index:200}
+.editor-modal.open{display:flex}
+.editor-dialog{width:min(980px,100%);max-height:92vh;overflow:auto;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 18px 60px rgba(0,0,0,.45)}
+.editor-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1}
+.editor-head h2{font-size:15px;margin:0;color:var(--text)}
+.editor-close{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--muted);cursor:pointer;font-size:18px;line-height:1}
+.editor-close:hover{color:#fff;border-color:var(--border2)}
+.editor-body{padding:14px 16px 16px}
+.editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.editor-field{display:flex;flex-direction:column;gap:5px}
+.editor-field.full{grid-column:1/-1}
+.editor-field label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.editor-field input,.editor-field select,.editor-field textarea{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:7px;color:var(--text);font:inherit;font-size:12px;padding:8px 10px;outline:none}
+.editor-field textarea{min-height:92px;resize:vertical;font-family:'JetBrains Mono',monospace;line-height:1.55}
+.editor-field input:focus,.editor-field select:focus,.editor-field textarea:focus{border-color:var(--blue)}
+.editor-help{font-size:10.5px;color:var(--muted2);line-height:1.5;margin-top:2px}
+.editor-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.editor-foot-left,.editor-foot-right{display:flex;gap:8px;flex-wrap:wrap}
 
 /* empty */
 #empty{display:none;padding:60px;text-align:center;color:var(--muted)}
@@ -141,6 +171,9 @@ mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1
   .card-name{min-width:0}
   .tabs{overflow-x:auto;padding:0 10px}
   .codeblock pre{font-size:10.5px}
+  .editor-grid{grid-template-columns:1fr}
+  .editor-actions{gap:5px}
+  .editor-btn,.editor-file{font-size:11px;padding:6px 8px}
 }
 </style>
 </head>
@@ -164,6 +197,12 @@ mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1
   <div id="topbar">
     <div id="pt">ทั้งหมด</div>
     <div id="pt-count"></div>
+    <div class="editor-actions" aria-label="Tool editor">
+      <button type="button" class="editor-btn primary" onclick="openToolEditor()">+ เพิ่ม Tool/Blog</button>
+      <button type="button" class="editor-btn" onclick="exportEditorData()">Export edits</button>
+      <label class="editor-file">Import edits<input type="file" accept="application/json,.json" onchange="importEditorData(this)"></label>
+      <button type="button" class="editor-btn danger" onclick="resetEditorData()">Reset edits</button>
+    </div>
     <div class="mobile-actions" aria-label="Mobile filters">
       <input id="mobile-search" class="search-input" placeholder="🔍 ค้นหา..." autocomplete="off" aria-label="ค้นหาเครื่องมือบนมือถือ">
       <select id="mobile-cat" aria-label="เลือกหมวดหมู่"></select>
@@ -178,13 +217,83 @@ mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1
 </div>
 <button id="btt" onclick="document.getElementById('main').scrollTo({top:0,behavior:'smooth'})">↑</button>
 
+<div id="editor-modal" class="editor-modal" aria-hidden="true">
+  <div class="editor-dialog" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+    <div class="editor-head">
+      <h2 id="editor-title">เพิ่ม Tool / Blog</h2>
+      <button type="button" class="editor-close" onclick="closeToolEditor()" aria-label="Close editor">×</button>
+    </div>
+    <form id="tool-editor-form" class="editor-body" onsubmit="saveToolEditor(event)">
+      <input type="hidden" id="editor-id">
+      <div class="editor-grid">
+        <div class="editor-field">
+          <label for="editor-name">ชื่อ Tool / Blog</label>
+          <input id="editor-name" required placeholder="เช่น Volatility 3 quick notes">
+        </div>
+        <div class="editor-field">
+          <label for="editor-cat">หมวดหมู่</label>
+          <select id="editor-cat" required></select>
+        </div>
+        <div class="editor-field">
+          <label for="editor-url">URL</label>
+          <input id="editor-url" placeholder="https://...">
+        </div>
+        <div class="editor-field">
+          <label for="editor-tags">Tags</label>
+          <input id="editor-tags" placeholder="cli, python, online">
+        </div>
+        <div class="editor-field full">
+          <label for="editor-desc">คำอธิบายสั้น</label>
+          <textarea id="editor-desc" required placeholder="สรุปสั้น ๆ ที่เห็นบนการ์ด"></textarea>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-about">ภาพรวม / เนื้อหา</label>
+          <textarea id="editor-about" placeholder="แก้/เพิ่มรายละเอียดหลักของ tool นี้"></textarea>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-blog">Blog / Notes</label>
+          <textarea id="editor-blog" placeholder="เขียน blog, guideline, writeup, ขั้นตอนคิด หรือ note เพิ่มเติมของ tool นี้"></textarea>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-install">ติดตั้ง</label>
+          <textarea id="editor-install" placeholder="คำสั่งติดตั้ง หรือ setup notes"></textarea>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-usage">วิธีใช้ / Commands</label>
+          <textarea id="editor-usage" placeholder="### Basic&#10;command here&#10;&#10;===&#10;&#10;### Advanced&#10;command here"></textarea>
+          <div class="editor-help">ใช้รูปแบบ ### ชื่อหัวข้อ แล้วตามด้วยคำสั่ง คั่นหลายบล็อกด้วย ===</div>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-tips">Tips</label>
+          <textarea id="editor-tips" placeholder="หนึ่งบรรทัดต่อหนึ่ง tip"></textarea>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-checklist">Checklist</label>
+          <textarea id="editor-checklist" placeholder="หนึ่งบรรทัดต่อหนึ่ง checklist"></textarea>
+        </div>
+      </div>
+      <div class="editor-foot">
+        <div class="editor-foot-left">
+          <button type="button" id="editor-delete" class="editor-btn danger" onclick="deleteToolFromModal()">ลบ Tool นี้</button>
+          <button type="button" id="editor-restore" class="editor-btn" onclick="restoreOriginalTool()">คืนค่าเดิมของ Tool นี้</button>
+        </div>
+        <div class="editor-foot-right">
+          <button type="button" class="editor-btn" onclick="closeToolEditor()">ยกเลิก</button>
+          <button type="submit" class="editor-btn primary">บันทึก</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 // ════════════════════════════════════════════════════════════
 // CATEGORIES
 // ════════════════════════════════════════════════════════════
 const CATS=[
   {id:'all',      icon:'🏠',label:'ทั้งหมด',     c:'#5b8dee'},
-  {id:'ctf2025',  icon:'25',label:'CTF 2025',    c:'#f5c842'},
+  {id:'knowledge',icon:'KB',label:'Knowledge',   c:'#3ecf74'},
+  {id:'ctf2025',  icon:'25',label:'Tools 2025',  c:'#f5c842'},
   {id:'training', icon:'🚩',label:'Training',     c:'#3ecf74'},
   {id:'general',  icon:'📋',label:'General',      c:'#5b8dee'},
   {id:'crypto',   icon:'🔒',label:'Cryptography', c:'#9b6dff'},
@@ -207,7 +316,7 @@ const CATS=[
 // schema: {cat,name,url,tags,desc, about, install, usage:[{label,body}],
 //          tips:[], checklist:[], notes}
 // ════════════════════════════════════════════════════════════
-const TOOLS=[
+let TOOLS=[
 
 /* ═══════════ CTF 2025 OFFICIAL TOOL PACK ═══════════ */
 {cat:'ctf2025',name:'CTF 2025 Web Application Toolkit',url:'https://portswigger.net/burp',tags:['cli','online','python'],
@@ -1433,7 +1542,168 @@ checklistTitle:'Misc/OSINT 2025 checklist',
 checklist:['อ่านโจทย์หา exact phrase, username, email, domain, image, address','ค้น Google/GitHub/Wayback ด้วย exact strings','ใช้ OSINT Framework เลือก tool ตาม artifact','ใช้ Sherlock/Namechk/Maigret กับ username','ตรวจ EXIF/GPS แล้วต่อด้วย Geohints/Wigle/Pic2map','สแกน QR/barcode ด้วย zbarimg','เปิด SQLite ด้วย sqlite3/DB Browser แล้ว dump grep','ตรวจ smart contract บน Etherscan/Remix/storage','ใช้ audio/image tools จาก Forensics เมื่อเป็น media misc','บันทึกหลักฐานและ URL ที่นำไปสู่ flag'],
 },
 
-{cat:'ctf2025',name:'PDF Notes — CTF Field Guide & Methodology',tags:['online','cli'],
+/* ═══════════ KNOWLEDGE NOTES FROM PDF COURSE MATERIALS ═══════════ */
+{cat:'knowledge',name:'Knowledge Notes — CTF Methodology & Field Guide',tags:['online'],
+desc:'PDF Notes จาก ctf_security.pdf, CTF_Forensic_v1.pdf, CTF_Workshop_v2: วิธีคิด, flag format, lab setup, playbook',
+about:'สรุปเนื้อหาภาพรวมจาก ctf_security.pdf, CTF_Forensic_v1.pdf และ CTF_Workshop_v2_OWASP_WEB_AND_Algorithms.pdf โดยตัดคำสั่งที่ซ้ำกับหมวด Tools 2025 ออก เหลือเป็น methodology: อ่านโจทย์, ระบุหมวด, แยก evidence, เลือกเครื่องมือ, validate flag และทำ note/writeup ให้ย้อนรอยได้',
+usage:[{label:'สนามคิดแบบ CTF',body:`Read: อ่านโจทย์, ไฟล์แนบ, URL/IP, hint, flag format
+Identify: magic bytes, service, language, protocol, encoding, runtime
+Route: Web / Forensics / Crypto / Pwn / Reverse / OSINT / Mobile / Network
+Test: ใช้เครื่องมือเล็กเพื่อยืนยันสมมติฐานก่อนใช้ automation หนัก
+Record: จด command, offset, credential, endpoint, payload ที่ให้ผล
+Validate: ตรวจ flag format, newline, casing, encoding ก่อน submit`},
+{label:'ข้อผิดพลาดที่ PDF เตือนโดยอ้อม',body:`เชื่อ extension มากกว่า header
+bruteforce ก่อนรู้ baseline
+ข้าม source/comment/metadata/log/history
+ใช้ tool ใหญ่โดยไม่อ่าน output
+แก้ไฟล์เสียบน original แทน copy
+ลืม UTF-16LE strings ใน Windows/memory
+ไม่แยก concept กับ command ทำให้ workflow ซ้ำและหลงทาง`},
+{label:'เมื่อควรเปลี่ยนหมวด',body:`Web ไม่คืบ: ดู JS/source/backup/.git หรือคิดเป็น auth/logic
+Forensics ไม่คืบ: กลับไป magic/header/strings/carving
+Crypto ไม่คืบ: แยก encoding/hash/encryption ก่อน
+Reverse ไม่คืบ: หยุดอ่าน decompiler แล้วดู strings/xrefs/dynamic
+Pwn ไม่คืบ: กลับไป checksec/crash/offset/protections
+OSINT ไม่คืบ: เปลี่ยน artifact จาก text -> image -> username -> archive`}],
+tips:['การ์ดนี้เป็น concept จาก PDF ไม่ใช่ command list เพื่อไม่ซ้ำกับ Tools 2025','ถ้าค้นชื่อไฟล์ PDF เช่น ctf_security หรือ CTF_Forensic_v1 จะเจอหมวด Knowledge ที่เกี่ยวข้อง','ใช้ Knowledge เพื่อเลือกทาง แล้วใช้ Tools 2025 เพื่อ copy command'],
+checklistTitle:'Knowledge methodology checklist',
+checklist:['รู้ flag format','รู้ category หรือ evidence หลัก','แยกสิ่งที่รู้/ไม่รู้','เลือก tool ตาม evidence','ทดสอบทีละสมมติฐาน','จดผลที่เปลี่ยนจริง','ย้อนกลับพื้นฐานเมื่อหลงทาง','validate flag ก่อนส่ง'],
+},
+{cat:'knowledge',name:'Knowledge Notes — Web & OWASP Concepts',tags:['online'],
+desc:'PDF Notes จาก Chapter05-Web Exploitations และ CTF_Workshop_v2: source, cookie, HTTP, IDOR, traversal, SQLi, XSS',
+about:'สรุปเนื้อหา Web จาก Chapter05-Web Exploitations.pdf และ CTF_Workshop_v2_OWASP_WEB_AND_Algorithms.pdf แบบไม่ซ้ำกับ command ใน Web Toolkit: เน้นความเข้าใจว่าแต่ละช่องโหว่เกิดจากอะไร สังเกตจากอะไร และควรไล่ลำดับอย่างไร',
+usage:[{label:'Web concept map',body:`Source inspection: clue ใน HTML comment, JS endpoint, CSS path, source map
+Cookie/session: role, user_id, JWT, Flask signed cookie, SameSite/Secure/HttpOnly
+HTTP behavior: method, status, redirect, header, content length, cache
+Access control: IDOR, missing server-side check, forced browsing
+Traversal/LFI: user input กลายเป็น filesystem path
+SQLi: input ถูกต่อเข้า query
+XSS: input ถูก render เป็น HTML/JS
+Misconfig: debug, default creds, exposed .git/.env/backup`},
+{label:'OWASP to CTF translation',body:`A01 Broken Access Control -> IDOR, role tamper, admin path
+A02 Crypto Failures -> weak JWT/session, reversible encoding
+A03 Injection -> SQLi, command, SSTI, NoSQL/LDAP/XPath
+A04 Insecure Design -> logic bypass, predictable reset token
+A05 Misconfiguration -> debug, verbose error, exposed files
+A08 Integrity Failures -> unsigned upload/plugin/deserialization`}],
+tips:['PDF Web ย้ำ source/cookie/HTTP พื้นฐาน เพราะเป็น clue ที่เจอบ่อยที่สุด','ถ้าคำสั่งซ้ำ ให้ดู CTF 2025 Web Application Toolkit แทน','Web CTF ดีๆ มักเป็น chain เช่น .git leak -> source -> JWT secret -> admin'],
+checklistTitle:'Web knowledge checklist',
+checklist:['ดู source/JS/comment ก่อน','เข้าใจ session model','วัด baseline response','แยก auth bug กับ injection bug','ระบุ input -> sink','เช็ค server-side validation','ตาม chain จาก clue ไป flag'],
+},
+{cat:'knowledge',name:'Knowledge Notes — Programming & Automation Concepts',tags:['python'],
+desc:'PDF Notes จาก Chapter03-Programming for Ethical Hacking: brute force, threading, parsing, sockets, algorithm patterns',
+about:'สรุป Chapter03-Programming for Ethical Hacking.pdf โดยตัด code ยาวที่ซ้ำกับ Programming Workspace ออก เหลือแนวคิดการใช้โปรแกรมช่วย CTF: automate งานซ้ำ, brute force อย่างมีขอบเขต, parse input, ใช้ timeout, แบ่งงาน, และสร้าง solve script ที่ rerun ได้',
+usage:[{label:'Automation decision tree',body:`Manual once: ทำมือเพื่อเข้าใจ protocol หรือ pattern
+Script next: ถ้าต้องทำซ้ำเกิน 3 รอบให้เขียน script
+Bound brute force: รู้ charset, length, oracle, stop condition
+Thread only when needed: network ช้าและ server รับ rate ได้
+Parse carefully: sample input/output ต้องผ่านก่อนยิงจริง
+Log output: เก็บ response ที่ผิดปกติไว้ดู clue`},
+{label:'Patterns from Chapter03',body:`PIN/password brute force
+SSH login automation
+ZIP/hash wordlist cracking
+file parsing and longest/palindrome/prime/fibonacci style algorithms
+matrix and math routines
+socket challenge automation
+turn manual terminal steps into solve.py`}],
+tips:['Programming PDF สำคัญตรง mindset: ใช้ code ลดงานซ้ำ ไม่ใช่ brute force ทุกอย่าง','ถ้า script ไม่มี timeout จะติดง่ายใน network challenge','แยก solver logic กับ connection logic ทำให้ debug ง่าย'],
+checklistTitle:'Programming knowledge checklist',
+checklist:['เข้าใจ input/output','มี stop condition','มี timeout/error handling','rerun ได้ตั้งแต่ต้น','เก็บ sample test','ใช้ regex/parser ที่ทน edge case','log เมื่อเจอ response แปลก'],
+},
+{cat:'knowledge',name:'Knowledge Notes — System, Pwn & Reverse Concepts',tags:['cli'],
+desc:'PDF Notes จาก Chapter04 และ Old-Chapter09: pentest stages, CVE mindset, binary/runtime routing, pwn chain',
+about:'รวมความรู้จาก Chapter04-System Exploitations.pdf และ Old-Chapter09-Reverse Engineering and Pwnage.pdf โดยแยก concept ออกจาก command: system exploitation stages, CVE mindset, service fingerprinting, privilege escalation thinking, reverse routing ตาม runtime และ pwn exploitation chain',
+usage:[{label:'System exploitation knowledge flow',body:`Recon: รู้ target, domain, public artifact
+Scan: รู้ port, service, version, OS hint
+Fingerprint: รู้ software family และ behavior
+Exploit: version/condition ตรง exploit จริงหรือไม่
+Foothold: ได้ shell/credential/file read
+Privilege: user context -> misconfig -> root/admin
+Report: จด exploit path และ evidence`},
+{label:'Reverse/Pwn routing',body:`Native C/C++ -> strings, symbols, decompiler, debugger, protections
+Python packed -> extractor, pyc, decompiler, disassembly
+Java/JAR -> bytecode/decompiler/resources
+.NET -> IL/decompiler/patchable methods
+Android -> APK as ZIP, manifest, strings, assets, smali
+Pwn -> crash, offset, protections, leak, ROP/ret2win/ret2libc, remote script`}],
+tips:['Chapter04 ให้ภาพใหญ่ของ exploit lifecycle ส่วน Old-Chapter09 ให้ routing ตามชนิด binary','อย่าใช้ exploit จาก CVE แค่เพราะชื่อ version คล้าย ต้องตรวจ condition','Reverse ที่ดีเริ่มจาก runtime ไม่ใช่เลือก GUI จากความเคยชิน'],
+checklistTitle:'System/reverse knowledge checklist',
+checklist:['รู้ service/version','รู้ exploit condition','รู้ current privilege','รู้ privesc surface','รู้ runtime/binary format','รู้ protection ของ binary','มี exploit path ที่ทำซ้ำได้'],
+},
+{cat:'knowledge',name:'Knowledge Notes — Cryptography Concepts',tags:['online','python'],
+desc:'PDF Notes จาก Chapter06 และ CTF_Forensic_v1: encoding ladder, OpenSSL use cases, RSA weaknesses',
+about:'สรุป Chapter06-Cryptography.pdf และส่วน crypto ใน CTF_Forensic_v1.pdf โดยลด command ซ้ำกับ Cryptography Toolkit เหลือแนวคิด: แยก encoding/hash/encryption, ladder ของ base encoding, classical cipher, OpenSSL file operations และ RSA weak patterns เช่น small e',
+usage:[{label:'Crypto classification',body:`Encoding: reversible without secret, alphabet/padding ชัด เช่น hex/base64/morse
+Hash: one-way, fixed-ish length, crack by wordlist/rules if weak
+Encryption: ต้องมี key/iv/mode หรือ exploit weakness
+Classical cipher: language frequency/pattern helps
+RSA: collect n,e,c,p,q,d,phi and inspect mathematical weakness
+Custom crypto: find oracle, repeated nonce, bad randomness, small keyspace`},
+{label:'Encoding ladder from Chapter06',body:`binary -> octal -> hex -> base32 -> base45 -> base58 -> base62 -> base64 -> base85 -> ASCII/UTF-8 -> Morse
+Use CyberChef/dCode to identify quickly, then confirm each layer by hand or script`},
+{label:'RSA weakness map',body:`small e exact root
+shared modulus
+common prime factor
+close primes / Fermat
+small d / Wiener
+known p/q/phi/d
+textbook RSA without padding
+CRT parameter leak`}],
+tips:['Crypto PDF มีประโยชน์มากในฐานะ decode ladder','ถ้าไม่รู้ว่าเป็น crypto หรือ encoding ให้เริ่มจาก alphabet/length/padding','RSA ต้องรวบรวมตัวแปรก่อนเลือก attack ไม่งั้นหลง'],
+checklistTitle:'Crypto knowledge checklist',
+checklist:['ระบุว่า encoding/hash/encryption','ดู alphabet/length/padding','ลอง decode ladder','หา known plaintext/flag format','รวบรวม key/material ทั้งหมด','เลือก attack ตาม weakness','validate plaintext หลังถอด'],
+},
+{cat:'knowledge',name:'Knowledge Notes — Forensics, Network & OSINT Concepts',tags:['online','cli'],
+desc:'PDF Notes จาก Chapter07, CTF_Forensic_v1, Old-Chapter08: evidence handling, signatures, carving, Volatility, pcap, OSINT routing',
+about:'รวมความรู้จาก Chapter07-Digital Forensics.pdf, CTF_Forensic_v1.pdf และ Old-Chapter08-OSINT for Investigations.pdf โดยไม่ซ้ำคำสั่งเครื่องมือ: chain of custody แบบ CTF, forensic types, file signatures, metadata, carving, memory/process thinking, pcap evidence และ OSINT artifact routing',
+usage:[{label:'Forensics concept map',body:`Evidence handling: hash original, work on copy, note offsets
+File forensics: magic/header/footer, metadata, embedded files, corruption
+Disk forensics: partition -> filesystem -> inode/file recovery
+Memory forensics: OS -> process -> cmdline -> files -> registry -> network
+Network forensics: protocol -> conversation -> stream -> object extraction
+Stego/media: metadata -> channels/LSB -> spectrogram -> hidden archive
+OSINT: route by artifact, verify source, keep URL evidence`},
+{label:'Signature and corruption thinking',body:`Header tells parser what file is
+Footer/trailer tells where file ends
+Size fields tell parser how much to read
+CRC/checksum tells whether chunk was changed
+Junk before header means carve from true offset
+Missing payload cannot be recreated by fixing header alone`},
+{label:'OSINT routing from Old-Chapter08',body:`Username -> Sherlock/Namechk/WhatsMyName
+Image -> EXIF/reverse image/geolocation
+Location -> maps/Geohints/Pic2map/What3Words
+Wireless -> Wigle
+Domain -> search engine/Wayback/Shodan
+Crypto address -> block explorer`}],
+tips:['Forensics PDF เน้น process: preserve, identify, analyze, recover, document','Network mini-course เน้น filter/stream/object มากกว่า tool name','OSINT ต้องมี source URL ที่พิสูจน์คำตอบ ไม่ใช่แค่เดา'],
+checklistTitle:'Forensics/network/OSINT knowledge checklist',
+checklist:['hash/copy evidence','identify type','check metadata','look for embedded data','carve/recover when needed','map memory artifacts by process','map pcap by conversation/stream','route OSINT by artifact','document source/offset'],
+},
+{cat:'knowledge',name:'Knowledge Notes — Mobile, APK & Cloud Concepts',tags:['java','online'],
+desc:'PDF Notes จาก ctf_security และ Old-Chapter09: APK as ZIP, mobile reverse, API intercept, AES ECB/CBC, AWS key leak',
+about:'สรุปเนื้อหา mobile/cloud จาก ctf_security.pdf และ Old-Chapter09: APK คือ ZIP, โครงสร้าง Manifest/resources/assets/smali, PIN/reverse/patch path, API interception, AES ECB/CBC clue และ AWS leaked key workflow โดยตัด command ซ้ำกับ Mobile/System/Crypto tools ออก',
+usage:[{label:'APK mental model',body:`APK = ZIP container
+Manifest defines permissions, exported components, deeplinks
+resources/strings/assets often hold static clues
+classes.dex/smali hold logic
+PIN challenges usually split into check logic and decrypt logic
+patching bypasses client-side checks but does not replace understanding`},
+{label:'Mobile dynamic thinking',body:`Install -> run -> observe logcat/network/files
+If API hidden: inspect code/resources first
+If TLS pinning blocks: patch/hook only after static clues
+If flag encrypted: find key, IV, mode, trigger condition
+If exported activity/deeplink: launch path directly`},
+{label:'Cloud/AWS key leak thinking',body:`Leaked key is not flag by itself
+First identify caller/account
+Then enumerate allowed services
+Look for S3, Secrets Manager, Lambda env, IAM policy, STS role assumption
+Privilege escalation is permission graph, not port scanning`}],
+tips:['ctf_security.pdf ย้ำ APK = ZIP เพราะ unzip ธรรมดามักเจอ clue แล้ว','ECB/CBC clue สำคัญ: ECB ไม่ใช้ IV, CBC ต้องมี IV','AWS challenge ต้องเริ่มจาก identity และ permission ไม่ใช่สุ่ม service'],
+checklistTitle:'Mobile/cloud knowledge checklist',
+checklist:['unpack APK mentally as ZIP','read Manifest/resources/assets','locate check/decrypt logic','observe runtime logs/API','separate key/IV/mode/data','identify cloud principal','enumerate permissions','trace path to secret/flag'],
+},
+
+{cat:'knowledge',archive:true,name:'PDF Notes — CTF Field Guide & Methodology',tags:['online','cli'],
 desc:'สรุปแก่นจาก ctf_security.pdf, CTF_Forensic_v1.pdf, CTF_Workshop_v2: วิธีคิด CTF, flag format, lab setup, playbook',
 about:'การ์ดนี้คือเนื้อหาจาก PDF กลุ่ม field guide/workshop ที่ควรรู้ก่อนเริ่มแข่ง: หมวด CTF หลัก, รูปแบบ flag, วิธีเตรียม lab, playbook การแก้โจทย์, การอ่าน clue, การไม่เสียเวลาผิดจุด และการเชื่อมเครื่องมือหลายหมวดเข้าด้วยกัน ไม่ใช่การคัดลอกสไลด์ทั้งเล่ม แต่สรุปเป็น guideline ใช้งานจริงในสนาม',
 usage:[{label:'CTF solving loop from PDFs',body:`# 1. Read
@@ -1488,7 +1758,7 @@ checklistTitle:'PDF methodology checklist',
 checklist:['อ่านโจทย์และ flag format','สร้าง working directory และ copy ไฟล์','รัน identify tools พื้นฐาน','เลือก lane ตาม evidence ไม่ใช่เดา','ใช้เครื่องมือเล็กก่อนเครื่องมือหนัก','จด command/output สำคัญ','หา flag ทั้ง ASCII และ UTF-16LE','ตรวจ metadata/history/logs','validate flag ก่อน submit','สรุปวิธีทำไว้เป็น writeup สั้นๆ'],
 },
 
-{cat:'ctf2025',name:'PDF Notes — Web Exploitations & OWASP',tags:['cli','online'],
+{cat:'knowledge',archive:true,name:'PDF Notes — Web Exploitations & OWASP',tags:['cli','online'],
 desc:'สรุป Chapter05-Web Exploitations + CTF_Workshop_v2: source inspection, cookies, HTTP, traversal, SQLi, XSS, Burp',
 about:'เนื้อหาจาก PDF Web Exploitations และ OWASP workshop ถูกสรุปเป็นลำดับทำโจทย์ Web: inspect source, HTML/CSS/JS, cookies/session, HTTP methods, path traversal, directory discovery, Burp interception, SQL Injection, XSS, SSRF, JWT และ security misconfiguration',
 usage:[{label:'PDF web inspection flow',body:`# Source inspection
@@ -1575,7 +1845,7 @@ checklistTitle:'PDF web checklist',
 checklist:['view-source และ grep comment/JS/CSS','เก็บ request สำคัญใน Burp','เช็ค cookies/session/JWT','ลอง HTTP methods และ headers','directory discovery ด้วย dirsearch/gobuster','parameter discovery ด้วย Arjun','ทดสอบ IDOR/access control','ทดสอบ traversal/LFI/RFI','ทดสอบ SQLi/XSS/SSTI/command injection','ค้น exposed .git/.env/backup/debug'],
 },
 
-{cat:'ctf2025',name:'PDF Notes — System Exploitation',tags:['cli'],
+{cat:'knowledge',archive:true,name:'PDF Notes — System Exploitation',tags:['cli'],
 desc:'สรุป Chapter04-System Exploitations: pentest stages, recon, scanning, gaining access, privesc, reporting',
 about:'Chapter04 สรุปภาพ system exploitation ตั้งแต่แนวคิด vulnerability, ตัวอย่าง CVE สำคัญ, stage ของ penetration testing, OSINT/recon, scanning, gaining access, maintaining access, covering tracks และ reporting ใน WEB2 สรุปเป็น workflow ที่ใช้กับ CTF machine ได้ทันที',
 usage:[{label:'Pentest stages converted to CTF workflow',body:`# Stage 1 Reconnaissance
@@ -1638,7 +1908,7 @@ checklistTitle:'PDF system checklist',
 checklist:['ระบุ target และ scope','Nmap fast/full/service/UDP','fingerprint web/service/version','ค้น exploit ด้วย searchsploit/CVE/HackTricks','อ่าน exploit code ก่อนรัน','ได้ shell แล้ว upgrade TTY','enumerate OS/user/network/files','privesc ด้วย sudo/SUID/capability/service/cron','เก็บ credentials reuse','จด path to flag'],
 },
 
-{cat:'ctf2025',name:'PDF Notes — Programming for Ethical Hacking',tags:['python','cli'],
+{cat:'knowledge',archive:true,name:'PDF Notes — Programming for Ethical Hacking',tags:['python','cli'],
 desc:'สรุป Chapter03: automation, brute force, threading, SSH brute, ZIP/hash cracking, algorithms, sockets',
 about:'Chapter03 เน้นการเขียนโปรแกรมเพื่อช่วยแฮ็กและแก้ CTF: brute force, automation, multithreading, SSH brute force, ZIP cracking, hash cracking, parsing files, prime/palindrome/Fibonacci/matrix algorithms และ socket programming การ์ดนี้แปลงเป็น template ที่เอาไปใช้ในสนามได้',
 usage:[{label:'Brute force and automation patterns',body:`# PIN brute force
@@ -1730,7 +2000,7 @@ checklistTitle:'PDF programming checklist',
 checklist:['เขียน parser input ให้ถูกก่อน','ทำ solve script rerun ได้','ใช้ itertools/product สำหรับ brute force','ใช้ timeout/error handling กับ network','ใช้ threading เฉพาะจำเป็น','ใช้ regex หาเลข/flag/token','เก็บ output ลงไฟล์เมื่อยาว','เทียบคำตอบกับ sample','เปลี่ยนจาก prototype เป็น final script','อย่าลืม edge cases'],
 },
 
-{cat:'ctf2025',name:'PDF Notes — Cryptography Course',tags:['python','online','cli'],
+{cat:'knowledge',archive:true,name:'PDF Notes — Cryptography Course',tags:['python','online','cli'],
 desc:'สรุป Chapter06 + forensic crypto: CyberChef, dCode, OpenSSL, encodings, Morse, RSA small-e',
 about:'Chapter06 มีพื้นฐาน cryptography และเครื่องมือ CyberChef, dCode.fr, OpenSSL รวมถึง encoding หลายฐาน เช่น binary, octal, hex, base32, base45, base58, base62, base64, base85, ASCII, UTF-8, Morse และแนว RSA จาก CTF_Forensic_v1 เช่น small e attack การ์ดนี้จัดเป็นขั้นตอน decode/attack',
 usage:[{label:'Encoding ladder from PDF',body:`# Try in this order when ciphertext looks encoded
@@ -1799,7 +2069,7 @@ checklistTitle:'PDF crypto checklist',
 checklist:['ดู alphabet/charset/length/padding','ลอง CyberChef Magic','ลอง base/hex/ascii/morse ladder','แยก encoding/hash/encryption','ใช้ dCode กับ classical cipher','ใช้ OpenSSL กับไฟล์ key/cert/AES','รวบรวมค่า RSA ทั้งหมด','ใช้ RsaCtfTool/Sage/FactorDB','เขียน Python เมื่อเป็น custom scheme','ค้น flag หลังทุก decode layer'],
 },
 
-{cat:'ctf2025',name:'PDF Notes — Digital Forensics Course',tags:['cli','python'],
+{cat:'knowledge',archive:true,name:'PDF Notes — Digital Forensics Course',tags:['cli','python'],
 desc:'สรุป Chapter07 + CTF_Forensic_v1: chain of custody, forensic types, metadata, signatures, CRC, carving, Volatility',
 about:'Chapter07 ให้ภาพรวม digital forensics ตั้งแต่ chain of custody, ประเภท forensic, file/disk/memory/network/cloud/mobile, metadata, file signatures, CRC, carving และ Python helper ส่วน CTF_Forensic_v1 เสริม methodology, signatures, Volatility และ network/crypto integration การ์ดนี้รวมเป็นคู่มือ forensic จาก PDF',
 usage:[{label:'Forensic process and evidence handling',body:`# CTF version of chain of custody
@@ -1871,7 +2141,7 @@ checklistTitle:'PDF forensic checklist',
 checklist:['hash original และทำ working copy','identify file type ด้วย magic','strings ASCII/UTF-16LE','metadata ด้วย exiftool/pdfinfo','binwalk/foremost/scalpel carve','ซ่อม header/footer/CRC เมื่อจำเป็น','disk image ใช้ mmls/fls/icat','memory ใช้ Volatility','network pcap ส่งต่อ Wireshark/tshark','จด offset และหลักฐานทุกขั้น'],
 },
 
-{cat:'ctf2025',name:'PDF Notes — Network Security Mini Course',tags:['cli'],
+{cat:'knowledge',archive:true,name:'PDF Notes — Network Security Mini Course',tags:['cli'],
 desc:'สรุป CTF_Forensic_v1 network: Wireshark, tcpdump, NetworkMiner, tshark, Zeek, SYN scan, HTTP/DNS decode',
 about:'CTF_Forensic_v1 มีส่วน Network Security ที่เน้นสิ่งที่ต้องหาใน CTF, เครื่องมือ Wireshark/tcpdump/NetworkMiner/tshark/Zeek และตัวอย่าง filter เช่น SYN scan การ์ดนี้สรุปเป็น packet-analysis workflow',
 usage:[{label:'Network clues to hunt',body:`# What to look for in CTF pcap
@@ -1921,7 +2191,7 @@ checklistTitle:'PDF network checklist',
 checklist:['capinfos/protocol hierarchy','conversation top talkers','SYN scan/filter anomalies','HTTP/DNS/FTP/SMTP/Telnet','follow streams','export objects/files','grep flag/password/secret','Zeek logs for timeline','NetworkMiner credentials/files/images','ส่ง extracted files ไป forensics/stego'],
 },
 
-{cat:'ctf2025',name:'PDF Notes — OSINT Investigations',tags:['online','cli'],
+{cat:'knowledge',archive:true,name:'PDF Notes — OSINT Investigations',tags:['online','cli'],
 desc:'สรุป Old-Chapter08: search engine, social media, people/phone, reverse image, username, EXIF, geolocation, wireless, archives, crypto',
 about:'Old-Chapter08 OSINT for Investigations แยกหมวด OSINT ชัดเจน: search engine, social media, people search, phone number, reverse image, username, EXIF viewer, geolocation, wireless network mapping, air traffic, marine records, internet archive, AI image clues และ cryptocurrency basics การ์ดนี้ทำเป็น workflow สำหรับ OSINT CTF',
 usage:[{label:'OSINT artifact routing',body:`Domain/URL     -> Google dorks, Wayback, crt.sh, Shodan, BuiltWith
@@ -1967,7 +2237,7 @@ checklistTitle:'PDF OSINT checklist',
 checklist:['ระบุ artifact: username/email/domain/image/location/crypto','ค้น exact phrase','ใช้ Google/GitHub dorks','ดู Wayback/archive','username ผ่าน Sherlock/Namechk/WhatsMyName','image ผ่าน EXIF + reverse image','geo ผ่าน Geohints/Pic2map/What3Words','Wi-Fi ผ่าน Wigle','crypto ผ่าน Etherscan/explorer','จด source URL ที่พิสูจน์ flag'],
 },
 
-{cat:'ctf2025',name:'PDF Notes — Reverse Engineering, Pwnage, APK & Cloud',tags:['cli','python','java'],
+{cat:'knowledge',archive:true,name:'PDF Notes — Reverse Engineering, Pwnage, APK & Cloud',tags:['cli','python','java'],
 desc:'สรุป Old-Chapter09 + ctf_security: C/C++ reverse, Python/Java/.NET reverse, APK=ZIP, AES ECB/CBC, API intercept, AWS key leak',
 about:'Old-Chapter09 สรุป reverse engineering และ pwnage ใน C/C++, Python, Java, .NET และ system compromise ส่วน ctf_security.pdf เพิ่ม field guide ด้าน APK/mobile, cloud/AWS key leak, API interception และ crypto mode อย่าง ECB/CBC การ์ดนี้รวมเนื้อหา PDF กลุ่มนี้เป็น playbook',
 usage:[{label:'Reverse/Pwn routing from PDF',body:`Native C/C++ binary:
@@ -8458,15 +8728,367 @@ tips:['CSRF ใช้ได้กับ state-changing action ที่ไม่
 },
 ];  // END TOOLS ARRAY
 
+// Hide archived long-form notes from the UI/search. They remain in this WEB2
+// source as a recoverable backup, while the visible Knowledge cards stay concise.
+TOOLS = TOOLS.filter(t => !t.archive);
+
+// Local editor data lives in the browser so every category/tool can be
+// edited without rewriting this large static reference file each time.
+const EDITOR_STORE_KEY = 'ctf-tools-web2-editor-v2';
+
+function cloneToolValue(value){
+  return JSON.parse(JSON.stringify(value));
+}
+
+function makeCustomToolId(){
+  return 'custom-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8);
+}
+
+function safeToolId(id){
+  return String(id || '')
+    .replace(/[^a-zA-Z0-9_-]/g,'-')
+    .replace(/-+/g,'-')
+    .replace(/^-|-$/g,'')
+    .slice(0,90) || makeCustomToolId();
+}
+
+function baseToolId(tool, index){
+  const slug = String(tool.name || 'tool')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-|-$/g,'')
+    .slice(0,48) || 'tool';
+  return `base-${index}-${slug}`;
+}
+
+function editableCats(){
+  return CATS.filter(c => c.id !== 'all');
+}
+
+function cleanCat(cat, fallback='misc'){
+  return editableCats().some(c => c.id === cat) ? cat : fallback;
+}
+
+function cleanString(value){
+  return String(value || '').trim();
+}
+
+function parseTags(value){
+  if(Array.isArray(value)) return value.map(cleanString).filter(Boolean);
+  return String(value || '').split(/[,\n]+/).map(cleanString).filter(Boolean);
+}
+
+function parseLineList(value){
+  if(Array.isArray(value)) return value.map(cleanString).filter(Boolean);
+  return String(value || '')
+    .split(/\r?\n/)
+    .map(line => cleanString(line).replace(/^[-*]\s+/,'').replace(/^\d+[.)]\s+/,''))
+    .filter(Boolean);
+}
+
+function normalizeUsageList(usage){
+  if(!Array.isArray(usage)) return [];
+  return usage.map(item => ({
+    label: cleanString(item && item.label) || 'Commands',
+    body: String((item && item.body) || '').trimEnd()
+  })).filter(item => item.label || item.body);
+}
+
+function parseUsageText(text){
+  const raw = String(text || '').trim();
+  if(!raw) return [];
+  return raw.split(/\r?\n\s*={3,}\s*\r?\n/)
+    .map(block => block.trim())
+    .filter(Boolean)
+    .map(block => {
+      const lines = block.split(/\r?\n/);
+      const first = cleanString(lines[0]);
+      if(first.startsWith('###')){
+        return {
+          label: cleanString(first.replace(/^#+\s*/,'')) || 'Commands',
+          body: lines.slice(1).join('\n').trimEnd()
+        };
+      }
+      return {label:'Commands', body:block};
+    });
+}
+
+function usageToText(usage){
+  return normalizeUsageList(usage)
+    .map(item => `### ${item.label}\n${item.body || ''}`.trimEnd())
+    .join('\n\n===\n\n');
+}
+
+function lineListToText(list){
+  return parseLineList(list).join('\n');
+}
+
+function normalizeToolForStore(tool, fallback={}){
+  const merged = Object.assign({}, fallback, tool || {});
+  return {
+    id: safeToolId(merged.id || fallback.id || makeCustomToolId()),
+    cat: cleanCat(merged.cat || fallback.cat || 'misc', fallback.cat || 'misc'),
+    name: cleanString(merged.name || fallback.name) || 'Untitled Tool',
+    url: cleanString(merged.url).replace(/"/g,'%22').replace(/'/g,'%27'),
+    tags: parseTags(merged.tags),
+    desc: cleanString(merged.desc || fallback.desc) || 'Custom note',
+    about: String(merged.about || ''),
+    blog: String(merged.blog || ''),
+    install: String(merged.install || ''),
+    usage: normalizeUsageList(merged.usage),
+    tips: parseLineList(merged.tips),
+    checklist: parseLineList(merged.checklist),
+    checklistTitle: cleanString(merged.checklistTitle || fallback.checklistTitle)
+  };
+}
+
+function defaultEditorStore(){
+  return {version:1, edits:{}, deleted:[], custom:[]};
+}
+
+function normalizeEditorStore(raw){
+  const store = defaultEditorStore();
+  if(!raw || typeof raw !== 'object') return store;
+  const edits = raw.edits && typeof raw.edits === 'object' ? raw.edits : {};
+  Object.keys(edits).forEach(id => {
+    const safeId = safeToolId(id);
+    store.edits[safeId] = normalizeToolForStore(Object.assign({}, edits[id], {id:safeId}));
+  });
+  store.deleted = Array.isArray(raw.deleted)
+    ? [...new Set(raw.deleted.map(safeToolId))]
+    : [];
+  store.custom = Array.isArray(raw.custom)
+    ? raw.custom.map(tool => normalizeToolForStore(tool)).filter(tool => tool.name)
+    : [];
+  return store;
+}
+
+function readEditorStore(){
+  try{
+    const raw = localStorage.getItem(EDITOR_STORE_KEY);
+    return raw ? normalizeEditorStore(JSON.parse(raw)) : defaultEditorStore();
+  }catch(err){
+    console.warn('Could not read editor store', err);
+    return defaultEditorStore();
+  }
+}
+
+function saveEditorStore(){
+  localStorage.setItem(EDITOR_STORE_KEY, JSON.stringify(TOOL_STORE));
+}
+
+function applyEditorStore(){
+  const deleted = new Set(TOOL_STORE.deleted || []);
+  const baseTools = ORIGINAL_TOOLS
+    .filter(tool => !deleted.has(tool.id))
+    .map(tool => TOOL_STORE.edits[tool.id]
+      ? Object.assign({}, tool, normalizeToolForStore(TOOL_STORE.edits[tool.id], tool), {id:tool.id})
+      : cloneToolValue(tool)
+    );
+  const customTools = (TOOL_STORE.custom || []).map(tool => normalizeToolForStore(tool));
+  return baseTools.concat(customTools);
+}
+
+function refreshToolView(){
+  TOOLS = applyEditorStore();
+  buildSidebar();
+  buildSections();
+  const input = primarySearchInput();
+  const q = input ? input.value : '';
+  if(q && q.trim()) handleSearch(q, input);
+  else showCat(currentCat || 'all');
+}
+
+function getToolById(id){
+  return TOOLS.find(tool => tool.id === id);
+}
+
+function isBaseTool(id){
+  return ORIGINAL_TOOLS.some(tool => tool.id === id);
+}
+
+function ensureEditorCatOptions(){
+  const select = document.getElementById('editor-cat');
+  if(!select) return;
+  select.innerHTML = editableCats()
+    .map(c => `<option value="${esc(c.id)}">${c.icon} ${esc(c.label)}</option>`)
+    .join('');
+}
+
+function openToolEditor(id=''){
+  ensureEditorCatOptions();
+  const modal = document.getElementById('editor-modal');
+  const tool = id ? getToolById(id) : null;
+  const defaultCat = currentCat && currentCat !== 'all' ? currentCat : 'misc';
+  document.getElementById('editor-title').textContent = tool ? `แก้ไข: ${tool.name}` : 'เพิ่ม Tool / Blog';
+  document.getElementById('editor-id').value = tool ? tool.id : '';
+  document.getElementById('editor-name').value = tool ? tool.name : '';
+  document.getElementById('editor-cat').value = tool ? tool.cat : cleanCat(defaultCat);
+  document.getElementById('editor-url').value = tool ? (tool.url || '') : '';
+  document.getElementById('editor-tags').value = tool ? parseTags(tool.tags).join(', ') : '';
+  document.getElementById('editor-desc').value = tool ? (tool.desc || '') : '';
+  document.getElementById('editor-about').value = tool ? (tool.about || '') : '';
+  document.getElementById('editor-blog').value = tool ? (tool.blog || '') : '';
+  document.getElementById('editor-install').value = tool ? (tool.install || '') : '';
+  document.getElementById('editor-usage').value = tool ? usageToText(tool.usage) : '';
+  document.getElementById('editor-tips').value = tool ? lineListToText(tool.tips) : '';
+  document.getElementById('editor-checklist').value = tool ? lineListToText(tool.checklist) : '';
+  document.getElementById('editor-delete').style.display = tool ? '' : 'none';
+  document.getElementById('editor-restore').style.display = tool && isBaseTool(tool.id) && TOOL_STORE.edits[tool.id] ? '' : 'none';
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  setTimeout(()=>document.getElementById('editor-name').focus(),0);
+}
+
+function closeToolEditor(){
+  const modal = document.getElementById('editor-modal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+}
+
+function toolFromEditorForm(existingId=''){
+  return normalizeToolForStore({
+    id: existingId || makeCustomToolId(),
+    cat: document.getElementById('editor-cat').value,
+    name: document.getElementById('editor-name').value,
+    url: document.getElementById('editor-url').value,
+    tags: document.getElementById('editor-tags').value,
+    desc: document.getElementById('editor-desc').value,
+    about: document.getElementById('editor-about').value,
+    blog: document.getElementById('editor-blog').value,
+    install: document.getElementById('editor-install').value,
+    usage: parseUsageText(document.getElementById('editor-usage').value),
+    tips: document.getElementById('editor-tips').value,
+    checklist: document.getElementById('editor-checklist').value
+  });
+}
+
+function saveToolEditor(event){
+  event.preventDefault();
+  const existingId = document.getElementById('editor-id').value;
+  const tool = toolFromEditorForm(existingId);
+  if(existingId && isBaseTool(existingId)){
+    tool.id = existingId;
+    TOOL_STORE.edits[existingId] = tool;
+    TOOL_STORE.deleted = (TOOL_STORE.deleted || []).filter(id => id !== existingId);
+  }else if(existingId){
+    const idx = (TOOL_STORE.custom || []).findIndex(item => item.id === existingId);
+    tool.id = existingId;
+    if(idx >= 0) TOOL_STORE.custom[idx] = tool;
+    else TOOL_STORE.custom.push(tool);
+  }else{
+    TOOL_STORE.custom.push(tool);
+  }
+  saveEditorStore();
+  closeToolEditor();
+  refreshToolView();
+}
+
+function deleteTool(id){
+  const tool = getToolById(id);
+  if(!tool) return;
+  if(!confirm(`ลบ/ซ่อน "${tool.name}" จากหน้านี้?`)) return;
+  if(isBaseTool(id)){
+    TOOL_STORE.deleted = [...new Set([...(TOOL_STORE.deleted || []), id])];
+    delete TOOL_STORE.edits[id];
+  }else{
+    TOOL_STORE.custom = (TOOL_STORE.custom || []).filter(item => item.id !== id);
+  }
+  saveEditorStore();
+  closeToolEditor();
+  refreshToolView();
+}
+
+function deleteToolFromModal(){
+  const id = document.getElementById('editor-id').value;
+  if(id) deleteTool(id);
+}
+
+function restoreOriginalTool(){
+  const id = document.getElementById('editor-id').value;
+  if(!id || !isBaseTool(id)) return;
+  delete TOOL_STORE.edits[id];
+  TOOL_STORE.deleted = (TOOL_STORE.deleted || []).filter(item => item !== id);
+  saveEditorStore();
+  closeToolEditor();
+  refreshToolView();
+}
+
+function resetEditorData(){
+  if(!confirm('ลบ edits/custom tools ทั้งหมดที่เก็บใน browser นี้?')) return;
+  localStorage.removeItem(EDITOR_STORE_KEY);
+  TOOL_STORE = defaultEditorStore();
+  closeToolEditor();
+  refreshToolView();
+}
+
+function exportEditorData(){
+  const payload = {
+    version:1,
+    exportedAt:new Date().toISOString(),
+    store:TOOL_STORE
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ctf-tools-web2-edits.json';
+  document.body.appendChild(a);
+  a.click();
+  URL.revokeObjectURL(a.href);
+  document.body.removeChild(a);
+}
+
+function importEditorData(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      TOOL_STORE = normalizeEditorStore(parsed.store || parsed);
+      saveEditorStore();
+      refreshToolView();
+      alert('นำเข้า edits เรียบร้อย');
+    }catch(err){
+      alert('ไฟล์ JSON ไม่ถูกต้อง');
+    }finally{
+      input.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function toolSearchText(tool){
+  const usage = (tool.usage || []).map(u => `${u.label || ''}\n${u.body || ''}`).join('\n');
+  return [
+    tool.name, tool.desc, tool.about, tool.blog, tool.install, tool.url,
+    (tool.tags || []).join(' '),
+    (tool.tips || []).join('\n'),
+    (tool.checklist || []).join('\n'),
+    usage
+  ].join('\n').toLowerCase();
+}
+
+const ORIGINAL_TOOLS = TOOLS.map((tool, index) => Object.assign(
+  cloneToolValue(tool),
+  {id:safeToolId(tool.id || baseToolId(tool, index))}
+));
+let TOOL_STORE = readEditorStore();
+TOOLS = applyEditorStore();
+
 // ════════════════════════════════════════════════════════════
 // RENDER ENGINE
 // ════════════════════════════════════════════════════════════
 
-function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+function esc(s){ return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+function escAttr(s){
+  return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
 function tagHtml(t){
   const cls={online:'tag-online',cli:'tag-cli',python:'tag-python',java:'tag-java',ruby:'tag-ruby'};
-  return `<span class="tag ${cls[t]||''}">${t}</span>`;
+  return `<span class="tag ${cls[t]||''}">${esc(t)}</span>`;
 }
 
 function catColor(id){
@@ -8477,7 +9099,7 @@ function renderCard(tool, q=''){
   const c = catColor(tool.cat);
   const hiE = s => {
     // escape HTML entities first, then apply search highlight
-    const escaped = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const escaped = esc(s);
     return q
       ? escaped.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), m=>`<mark>${m}</mark>`)
       : escaped;
@@ -8485,6 +9107,8 @@ function renderCard(tool, q=''){
   // alias for non-escaped version (code blocks already use esc())
   const hi = hiE;
   const uid = 'card_' + Math.random().toString(36).slice(2);
+  const toolId = escAttr(tool.id || '');
+  const toolUrl = escAttr(tool.url || '');
 
   // build tabs
   const tabs=[], contents=[];
@@ -8502,6 +9126,15 @@ function renderCard(tool, q=''){
       </div>`:''}
     </div>`);
   }
+  if(tool.blog){
+    tabs.push({id:'blog',label:'Blog'});
+    contents.push(`<div class="tab-content" id="${uid}_blog">
+      <div class="doc-section">
+        <h4>Blog / Notes</h4>
+        <div class="doc-p">${hi(tool.blog)}</div>
+      </div>
+    </div>`);
+  }
   if(tool.install){
     tabs.push({id:'install',label:'ติดตั้ง'});
     contents.push(`<div class="tab-content" id="${uid}_install">
@@ -8515,7 +9148,7 @@ function renderCard(tool, q=''){
     tabs.push({id:'usage',label:'วิธีใช้'});
     contents.push(`<div class="tab-content" id="${uid}_usage">
       ${tool.usage.map(u=>`<div class="codeblock">
-        <div class="code-label">${u.label}</div>
+        <div class="code-label">${esc(u.label)}</div>
         <button class="copy-btn" onclick="copyCode(this)">copy</button>
         <pre>${esc(u.body)}</pre>
       </div>`).join('')}
@@ -8529,7 +9162,9 @@ function renderCard(tool, q=''){
     <div class="card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="${uid}_body" onclick="toggleCard('${uid}','${firstTab}')" onkeydown="cardKey(event,'${uid}','${firstTab}')">
       <div class="card-top">
         <div class="card-name"><span class="dot"></span>${hi(tool.name)}</div>
-        <div style="display:flex;gap:6px;align-items:center">
+        <div class="editor-card-actions">
+          <button type="button" class="editor-mini-btn" onclick="event.stopPropagation();openToolEditor('${toolId}')">แก้ไข</button>
+          <button type="button" class="editor-mini-btn danger" onclick="event.stopPropagation();deleteTool('${toolId}')">ลบ</button>
           ${tool.url?`<a class="card-link" href="${tool.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">↗ เปิด</a>`:''}
           ${hasExpand?`<span class="card-expand" id="${uid}_btn">▾ ดูเพิ่ม</span>`:''}
         </div>
@@ -8570,13 +9205,14 @@ function switchTab(uid, tabId){
     t.classList.toggle('active', t.textContent.trim() === tabIdToLabel(tabId));
   });
   // hide all, show target
-  ['about','install','usage'].forEach(id=>{
+  ['about','blog','install','usage'].forEach(id=>{
     const el = document.getElementById(`${uid}_${id}`);
     if(el) el.classList.toggle('active', id===tabId);
   });
 }
 
 function tabIdToLabel(id){
+  if(id === 'blog') return 'Blog';
   return {about:'ภาพรวม',install:'ติดตั้ง',usage:'วิธีใช้'}[id]||id;
 }
 
@@ -8699,12 +9335,7 @@ function handleSearch(value, source=null){
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('pt').textContent=`ค้นหา "${value}"`;
 
-  const hits = TOOLS.filter(t=>
-    t.name.toLowerCase().includes(q)||
-    t.desc.toLowerCase().includes(q)||
-    (t.about&&t.about.toLowerCase().includes(q))||
-    (t.usage&&t.usage.some(u=>u.body.toLowerCase().includes(q)))
-  );
+  const hits = TOOLS.filter(t => toolSearchText(t).includes(q));
 
   if(!hits.length){
     sr.innerHTML='';
@@ -8756,6 +9387,11 @@ document.addEventListener('keydown',e=>{
     primarySearchInput().focus();
   }
   if(e.key==='Escape'){
+    const modal = document.getElementById('editor-modal');
+    if(modal && modal.classList.contains('open')){
+      closeToolEditor();
+      return;
+    }
     const sb=primarySearchInput();
     handleSearch('', sb);
     sb.blur();
