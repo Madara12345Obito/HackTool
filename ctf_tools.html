@@ -71,7 +71,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .card-link:hover,.card-link:focus-visible{border-color:var(--cyan);color:#b8ffff;outline:none}
 .card-expand{font-size:10px;color:var(--muted2);background:var(--bg3);padding:3px 8px;border-radius:5px;flex-shrink:0;transition:all .15s;cursor:pointer;border:1px solid var(--border)}
 .card-expand:hover{border-color:var(--border2);color:var(--text)}
-.card-actions{display:flex;gap:5px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
 .card-desc{font-size:12px;color:var(--text);opacity:.8;line-height:1.5}
 .card-tags{display:flex;flex-wrap:wrap;gap:3px}
 .tag{font-size:9.5px;font-weight:500;padding:1px 7px;border-radius:99px}
@@ -117,6 +116,39 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .sr-cat-badge{display:inline-block;font-size:9px;padding:1px 7px;border-radius:99px;margin-bottom:5px;background:var(--bg4);color:var(--muted)}
 mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1px}
 
+/* editor */
+.editor-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.editor-btn,.editor-file{border:1px solid var(--border2);background:var(--bg3);color:var(--text);border-radius:7px;padding:6px 10px;font:inherit;font-size:11.5px;cursor:pointer;transition:.14s;text-decoration:none}
+.editor-btn:hover,.editor-file:hover{border-color:var(--blue);color:#fff}
+.editor-btn.primary{background:rgba(91,141,238,.16);border-color:rgba(91,141,238,.4);color:#cfe0ff}
+.editor-btn.danger{background:rgba(255,92,122,.12);border-color:rgba(255,92,122,.35);color:#ff9bac}
+.editor-sync-status{display:inline-flex;align-items:center;min-height:30px;padding:0 9px;border:1px solid var(--border);border-radius:7px;background:var(--bg2);color:var(--muted);font-size:10.5px}
+.editor-sync-status.on{border-color:rgba(62,207,116,.35);color:#8ee9ad;background:rgba(62,207,116,.08)}
+.editor-sync-status.warn{border-color:rgba(245,200,66,.35);color:#f1d47a;background:rgba(245,200,66,.08)}
+.editor-file input{display:none}
+.editor-card-actions{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.editor-mini-btn{font-size:10px;color:var(--muted);background:var(--bg3);padding:3px 7px;border-radius:5px;flex-shrink:0;transition:all .15s;cursor:pointer;border:1px solid var(--border);font-family:inherit}
+.editor-mini-btn:hover{border-color:var(--border2);color:var(--text)}
+.editor-mini-btn.danger:hover{border-color:var(--red);color:#ffc7d0}
+.editor-modal{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:center;justify-content:center;padding:18px;z-index:200}
+.editor-modal.open{display:flex}
+.editor-dialog{width:min(980px,100%);max-height:92vh;overflow:auto;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 18px 60px rgba(0,0,0,.45)}
+.editor-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1}
+.editor-head h2{font-size:15px;margin:0;color:var(--text)}
+.editor-close{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--muted);cursor:pointer;font-size:18px;line-height:1}
+.editor-close:hover{color:#fff;border-color:var(--border2)}
+.editor-body{padding:14px 16px 16px}
+.editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.editor-field{display:flex;flex-direction:column;gap:5px}
+.editor-field.full{grid-column:1/-1}
+.editor-field label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.editor-field input,.editor-field select,.editor-field textarea{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:7px;color:var(--text);font:inherit;font-size:12px;padding:8px 10px;outline:none}
+.editor-field textarea{min-height:92px;resize:vertical;font-family:'JetBrains Mono',monospace;line-height:1.55}
+.editor-field input:focus,.editor-field select:focus,.editor-field textarea:focus{border-color:var(--blue)}
+.editor-help{font-size:10.5px;color:var(--muted2);line-height:1.5;margin-top:2px}
+.editor-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.editor-foot-left,.editor-foot-right{display:flex;gap:8px;flex-wrap:wrap}
+
 /* empty */
 #empty{display:none;padding:60px;text-align:center;color:var(--muted)}
 #empty .ei{font-size:36px;margin-bottom:10px}
@@ -142,6 +174,9 @@ mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1
   .card-name{min-width:0}
   .tabs{overflow-x:auto;padding:0 10px}
   .codeblock pre{font-size:10.5px}
+  .editor-grid{grid-template-columns:1fr}
+  .editor-actions{gap:5px}
+  .editor-btn,.editor-file{font-size:11px;padding:6px 8px}
 }
 </style>
 </head>
@@ -165,6 +200,13 @@ mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1
   <div id="topbar">
     <div id="pt">ทั้งหมด</div>
     <div id="pt-count"></div>
+    <div class="editor-actions" aria-label="Tool editor">
+      <button type="button" class="editor-btn primary" onclick="openToolEditor()">+ เพิ่ม Tool/Blog</button>
+      <button type="button" class="editor-btn" onclick="exportEditorData()">Export edits</button>
+      <label class="editor-file">Import edits<input type="file" accept="application/json,.json" onchange="importEditorData(this)"></label>
+      <button type="button" class="editor-btn danger" onclick="resetEditorData()">Reset edits</button>
+      <span id="editor-sync-status" class="editor-sync-status">Local only</span>
+    </div>
     <div class="mobile-actions" aria-label="Mobile filters">
       <input id="mobile-search" class="search-input" placeholder="🔍 ค้นหา..." autocomplete="off" aria-label="ค้นหาเครื่องมือบนมือถือ">
       <select id="mobile-cat" aria-label="เลือกหมวดหมู่"></select>
@@ -178,6 +220,75 @@ mark{background:rgba(245,200,66,.22);color:#f0d060;border-radius:2px;padding:0 1
 </div>
 </div>
 <button id="btt" onclick="document.getElementById('main').scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div id="editor-modal" class="editor-modal" aria-hidden="true">
+  <div class="editor-dialog" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+    <div class="editor-head">
+      <h2 id="editor-title">เพิ่ม Tool / Blog</h2>
+      <button type="button" class="editor-close" onclick="closeToolEditor()" aria-label="Close editor">×</button>
+    </div>
+    <form id="tool-editor-form" class="editor-body" onsubmit="saveToolEditor(event)">
+      <input type="hidden" id="editor-id">
+      <div class="editor-grid">
+        <div class="editor-field">
+          <label for="editor-name">ชื่อ Tool / Blog</label>
+          <input id="editor-name" required placeholder="เช่น Volatility 3 quick notes">
+        </div>
+        <div class="editor-field">
+          <label for="editor-cat">หมวดหมู่</label>
+          <select id="editor-cat" required></select>
+        </div>
+        <div class="editor-field">
+          <label for="editor-url">URL</label>
+          <input id="editor-url" placeholder="https://...">
+        </div>
+        <div class="editor-field">
+          <label for="editor-tags">Tags</label>
+          <input id="editor-tags" placeholder="cli, python, online">
+        </div>
+        <div class="editor-field full">
+          <label for="editor-desc">คำอธิบายสั้น</label>
+          <textarea id="editor-desc" required placeholder="สรุปสั้น ๆ ที่เห็นบนการ์ด"></textarea>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-about">ภาพรวม / เนื้อหา</label>
+          <textarea id="editor-about" placeholder="แก้/เพิ่มรายละเอียดหลักของ tool นี้"></textarea>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-blog">Blog / Notes</label>
+          <textarea id="editor-blog" placeholder="เขียน blog, guideline, writeup, ขั้นตอนคิด หรือ note เพิ่มเติมของ tool นี้"></textarea>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-install">ติดตั้ง</label>
+          <textarea id="editor-install" placeholder="คำสั่งติดตั้ง หรือ setup notes"></textarea>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-usage">วิธีใช้ / Commands</label>
+          <textarea id="editor-usage" placeholder="### Basic&#10;command here&#10;&#10;===&#10;&#10;### Advanced&#10;command here"></textarea>
+          <div class="editor-help">ใช้รูปแบบ ### ชื่อหัวข้อ แล้วตามด้วยคำสั่ง คั่นหลายบล็อกด้วย ===</div>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-tips">Tips</label>
+          <textarea id="editor-tips" placeholder="หนึ่งบรรทัดต่อหนึ่ง tip"></textarea>
+        </div>
+        <div class="editor-field full">
+          <label for="editor-checklist">Checklist</label>
+          <textarea id="editor-checklist" placeholder="หนึ่งบรรทัดต่อหนึ่ง checklist"></textarea>
+        </div>
+      </div>
+      <div class="editor-foot">
+        <div class="editor-foot-left">
+          <button type="button" id="editor-delete" class="editor-btn danger" onclick="deleteToolFromModal()">ลบ Tool นี้</button>
+          <button type="button" id="editor-restore" class="editor-btn" onclick="restoreOriginalTool()">คืนค่าเดิมของ Tool นี้</button>
+        </div>
+        <div class="editor-foot-right">
+          <button type="button" class="editor-btn" onclick="closeToolEditor()">ยกเลิก</button>
+          <button type="submit" class="editor-btn primary">บันทึก</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script>
 // ════════════════════════════════════════════════════════════
@@ -8625,10 +8736,451 @@ tips:['CSRF ใช้ได้กับ state-changing action ที่ไม่
 // source as a recoverable backup, while the visible Knowledge cards stay concise.
 TOOLS = TOOLS.filter(t => !t.archive);
 
+const EDITOR_STORE_KEY = 'ctf-tools-web2-editor-v2';
+const SHARED_EDITOR_STORE_URL = 'api/editor-store';
+let SHARED_EDITOR_READY = false;
+let SHARED_EDITOR_PUSHING = false;
+let SHARED_EDITOR_POLL = null;
+let SHARED_EDITOR_LAST_SIGNATURE = '';
+
+function cloneToolValue(value){
+  return JSON.parse(JSON.stringify(value));
+}
+
+function makeCustomToolId(){
+  return 'custom-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8);
+}
+
+function safeToolId(id){
+  return String(id || '')
+    .replace(/[^a-zA-Z0-9_-]/g,'-')
+    .replace(/-+/g,'-')
+    .replace(/^-|-$/g,'')
+    .slice(0,90) || makeCustomToolId();
+}
+
+function baseToolId(tool, index){
+  const slug = String(tool.name || 'tool')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-|-$/g,'')
+    .slice(0,48) || 'tool';
+  return `base-${index}-${slug}`;
+}
+
+function editableCats(){
+  return CATS.filter(c => c.id !== 'all');
+}
+
+function cleanCat(cat, fallback='misc'){
+  return editableCats().some(c => c.id === cat) ? cat : fallback;
+}
+
+function cleanString(value){
+  return String(value || '').trim();
+}
+
+function parseTags(value){
+  if(Array.isArray(value)) return value.map(cleanString).filter(Boolean);
+  return String(value || '').split(/[,\n]+/).map(cleanString).filter(Boolean);
+}
+
+function parseLineList(value){
+  if(Array.isArray(value)) return value.map(cleanString).filter(Boolean);
+  return String(value || '')
+    .split(/\r?\n/)
+    .map(line => cleanString(line).replace(/^[-*]\s+/,'').replace(/^\d+[.)]\s+/,''))
+    .filter(Boolean);
+}
+
+function normalizeUsageList(usage){
+  if(!Array.isArray(usage)) return [];
+  return usage.map(item => ({
+    label: cleanString(item && item.label) || 'Commands',
+    body: String((item && item.body) || '').trimEnd()
+  })).filter(item => item.label || item.body);
+}
+
+function parseUsageText(text){
+  const raw = String(text || '').trim();
+  if(!raw) return [];
+  return raw.split(/\r?\n\s*={3,}\s*\r?\n/)
+    .map(block => block.trim())
+    .filter(Boolean)
+    .map(block => {
+      const lines = block.split(/\r?\n/);
+      const first = cleanString(lines[0]);
+      if(first.startsWith('###')){
+        return {
+          label: cleanString(first.replace(/^#+\s*/,'')) || 'Commands',
+          body: lines.slice(1).join('\n').trimEnd()
+        };
+      }
+      return {label:'Commands', body:block};
+    });
+}
+
+function usageToText(usage){
+  return normalizeUsageList(usage)
+    .map(item => `### ${item.label}\n${item.body || ''}`.trimEnd())
+    .join('\n\n===\n\n');
+}
+
+function lineListToText(list){
+  return parseLineList(list).join('\n');
+}
+
+function normalizeToolForStore(tool, fallback={}){
+  const merged = Object.assign({}, fallback, tool || {});
+  return {
+    id: safeToolId(merged.id || fallback.id || makeCustomToolId()),
+    cat: cleanCat(merged.cat || fallback.cat || 'misc', fallback.cat || 'misc'),
+    name: cleanString(merged.name || fallback.name) || 'Untitled Tool',
+    url: cleanString(merged.url).replace(/"/g,'%22').replace(/'/g,'%27'),
+    tags: parseTags(merged.tags),
+    desc: cleanString(merged.desc || fallback.desc) || 'Custom note',
+    about: String(merged.about || ''),
+    blog: String(merged.blog || ''),
+    install: String(merged.install || ''),
+    usage: normalizeUsageList(merged.usage),
+    tips: parseLineList(merged.tips),
+    checklist: parseLineList(merged.checklist),
+    checklistTitle: cleanString(merged.checklistTitle || fallback.checklistTitle)
+  };
+}
+
+function defaultEditorStore(){
+  return {version:1, edits:{}, deleted:[], custom:[]};
+}
+
+function normalizeEditorStore(raw){
+  const store = defaultEditorStore();
+  if(!raw || typeof raw !== 'object') return store;
+  const edits = raw.edits && typeof raw.edits === 'object' ? raw.edits : {};
+  Object.keys(edits).forEach(id => {
+    const safeId = safeToolId(id);
+    store.edits[safeId] = normalizeToolForStore(Object.assign({}, edits[id], {id:safeId}));
+  });
+  store.deleted = Array.isArray(raw.deleted)
+    ? [...new Set(raw.deleted.map(safeToolId))]
+    : [];
+  store.custom = Array.isArray(raw.custom)
+    ? raw.custom.map(tool => normalizeToolForStore(tool)).filter(tool => tool.name)
+    : [];
+  return store;
+}
+
+function readEditorStore(){
+  try{
+    const raw = localStorage.getItem(EDITOR_STORE_KEY);
+    return raw ? normalizeEditorStore(JSON.parse(raw)) : defaultEditorStore();
+  }catch(err){
+    console.warn('Could not read editor store', err);
+    return defaultEditorStore();
+  }
+}
+
+function writeEditorStoreLocal(store){
+  localStorage.setItem(EDITOR_STORE_KEY, JSON.stringify(normalizeEditorStore(store)));
+}
+
+function saveEditorStore(){
+  writeEditorStoreLocal(TOOL_STORE);
+  queueSharedEditorStorePush();
+}
+
+function editorSyncStatusEl(){
+  return document.getElementById('editor-sync-status');
+}
+
+function setEditorSyncStatus(text, mode){
+  const el = editorSyncStatusEl();
+  if(!el) return;
+  el.classList.remove('on','warn');
+  if(mode) el.classList.add(mode);
+  el.textContent = text;
+}
+
+function editorSyncEnabled(){
+  return location.protocol === 'http:' || location.protocol === 'https:';
+}
+
+function editorStoreSignature(store){
+  try{
+    return JSON.stringify(normalizeEditorStore(store || defaultEditorStore()));
+  }catch(err){
+    return '';
+  }
+}
+
+function mergeEditorStores(baseStore, incomingStore){
+  const base = normalizeEditorStore(baseStore || defaultEditorStore());
+  const incoming = normalizeEditorStore(incomingStore || defaultEditorStore());
+  const merged = defaultEditorStore();
+  merged.edits = Object.assign({}, base.edits, incoming.edits);
+  merged.deleted = [...new Set([...(base.deleted || []), ...(incoming.deleted || [])])];
+  const customById = {};
+  (base.custom || []).forEach(tool => { customById[tool.id] = tool; });
+  (incoming.custom || []).forEach(tool => { customById[tool.id] = tool; });
+  merged.custom = Object.keys(customById).map(id => customById[id]);
+  return normalizeEditorStore(merged);
+}
+
+async function loadSharedEditorStore(){
+  if(!editorSyncEnabled()){
+    setEditorSyncStatus('Local only', 'warn');
+    return;
+  }
+  try{
+    const resp = await fetch(SHARED_EDITOR_STORE_URL, {cache:'no-store'});
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const parsed = await resp.json();
+    const remote = normalizeEditorStore(parsed.store || parsed);
+    const remoteSignature = editorStoreSignature(remote);
+    if(!remoteSignature){
+      setEditorSyncStatus('Shared empty', 'warn');
+      SHARED_EDITOR_READY = true;
+      return;
+    }
+
+    const local = normalizeEditorStore(TOOL_STORE);
+    const localSignature = editorStoreSignature(local);
+    const defaultSignature = editorStoreSignature(defaultEditorStore());
+    if(remoteSignature === defaultSignature && localSignature !== defaultSignature){
+      TOOL_STORE = local;
+      SHARED_EDITOR_READY = true;
+      SHARED_EDITOR_LAST_SIGNATURE = remoteSignature;
+      queueSharedEditorStorePush();
+    }else if(localSignature !== remoteSignature){
+      TOOL_STORE = remote;
+      writeEditorStoreLocal(TOOL_STORE);
+      refreshToolView();
+    }
+    SHARED_EDITOR_LAST_SIGNATURE = editorStoreSignature(TOOL_STORE);
+    SHARED_EDITOR_READY = true;
+    setEditorSyncStatus('Shared sync on', 'on');
+  }catch(err){
+    SHARED_EDITOR_READY = false;
+    setEditorSyncStatus('Local only', 'warn');
+  }
+}
+
+function queueSharedEditorStorePush(){
+  if(!SHARED_EDITOR_READY || !editorSyncEnabled()) return;
+  if(SHARED_EDITOR_PUSHING) return;
+  const signature = editorStoreSignature(TOOL_STORE);
+  if(signature === SHARED_EDITOR_LAST_SIGNATURE) return;
+  SHARED_EDITOR_LAST_SIGNATURE = signature;
+  SHARED_EDITOR_PUSHING = true;
+  fetch(SHARED_EDITOR_STORE_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(TOOL_STORE)
+  }).then(resp => {
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    setEditorSyncStatus('Shared saved', 'on');
+  }).catch(err => {
+    setEditorSyncStatus('Save pending', 'warn');
+  }).finally(() => {
+    SHARED_EDITOR_PUSHING = false;
+  });
+}
+
+function startSharedEditorPolling(){
+  if(!editorSyncEnabled()) return;
+  if(SHARED_EDITOR_POLL) clearInterval(SHARED_EDITOR_POLL);
+  SHARED_EDITOR_POLL = setInterval(() => {
+    const modal = document.getElementById('editor-modal');
+    if(modal && modal.classList.contains('open')) return;
+    loadSharedEditorStore();
+  }, 5000);
+}
+
+function applyEditorStore(){
+  const deleted = new Set(TOOL_STORE.deleted || []);
+  const baseTools = ORIGINAL_TOOLS
+    .filter(tool => !deleted.has(tool.id))
+    .map(tool => TOOL_STORE.edits[tool.id]
+      ? Object.assign({}, tool, normalizeToolForStore(TOOL_STORE.edits[tool.id], tool), {id:tool.id})
+      : cloneToolValue(tool)
+    );
+  const customTools = (TOOL_STORE.custom || []).map(tool => normalizeToolForStore(tool));
+  return baseTools.concat(customTools);
+}
+
+function refreshToolView(){
+  TOOLS = applyEditorStore();
+  buildSidebar();
+  buildSections();
+  const input = primarySearchInput();
+  const q = input ? input.value : '';
+  if(q && q.trim()) handleSearch(q, input);
+  else showCat(currentCat || 'all');
+}
+
+function getToolById(id){
+  return TOOLS.find(tool => tool.id === id);
+}
+
+function isBaseTool(id){
+  return ORIGINAL_TOOLS.some(tool => tool.id === id);
+}
+
+function ensureEditorCatOptions(){
+  const select = document.getElementById('editor-cat');
+  if(!select) return;
+  select.innerHTML = editableCats()
+    .map(c => `<option value="${esc(c.id)}">${c.icon} ${esc(c.label)}</option>`)
+    .join('');
+}
+
+function openToolEditor(id=''){
+  ensureEditorCatOptions();
+  const modal = document.getElementById('editor-modal');
+  const tool = id ? getToolById(id) : null;
+  const defaultCat = currentCat && currentCat !== 'all' ? currentCat : 'misc';
+  document.getElementById('editor-title').textContent = tool ? `แก้ไข: ${tool.name}` : 'เพิ่ม Tool / Blog';
+  document.getElementById('editor-id').value = tool ? tool.id : '';
+  document.getElementById('editor-name').value = tool ? tool.name : '';
+  document.getElementById('editor-cat').value = tool ? tool.cat : cleanCat(defaultCat);
+  document.getElementById('editor-url').value = tool ? (tool.url || '') : '';
+  document.getElementById('editor-tags').value = tool ? parseTags(tool.tags).join(', ') : '';
+  document.getElementById('editor-desc').value = tool ? (tool.desc || '') : '';
+  document.getElementById('editor-about').value = tool ? (tool.about || '') : '';
+  document.getElementById('editor-blog').value = tool ? (tool.blog || '') : '';
+  document.getElementById('editor-install').value = tool ? (tool.install || '') : '';
+  document.getElementById('editor-usage').value = tool ? usageToText(tool.usage) : '';
+  document.getElementById('editor-tips').value = tool ? lineListToText(tool.tips) : '';
+  document.getElementById('editor-checklist').value = tool ? lineListToText(tool.checklist) : '';
+  document.getElementById('editor-delete').style.display = tool ? '' : 'none';
+  document.getElementById('editor-restore').style.display = tool && isBaseTool(tool.id) && TOOL_STORE.edits[tool.id] ? '' : 'none';
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  setTimeout(()=>document.getElementById('editor-name').focus(),0);
+}
+
+function closeToolEditor(){
+  const modal = document.getElementById('editor-modal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+}
+
+function toolFromEditorForm(existingId=''){
+  return normalizeToolForStore({
+    id: existingId || makeCustomToolId(),
+    cat: document.getElementById('editor-cat').value,
+    name: document.getElementById('editor-name').value,
+    url: document.getElementById('editor-url').value,
+    tags: document.getElementById('editor-tags').value,
+    desc: document.getElementById('editor-desc').value,
+    about: document.getElementById('editor-about').value,
+    blog: document.getElementById('editor-blog').value,
+    install: document.getElementById('editor-install').value,
+    usage: parseUsageText(document.getElementById('editor-usage').value),
+    tips: document.getElementById('editor-tips').value,
+    checklist: document.getElementById('editor-checklist').value
+  });
+}
+
+function saveToolEditor(event){
+  event.preventDefault();
+  const existingId = document.getElementById('editor-id').value;
+  const tool = toolFromEditorForm(existingId);
+  if(existingId && isBaseTool(existingId)){
+    tool.id = existingId;
+    TOOL_STORE.edits[existingId] = tool;
+    TOOL_STORE.deleted = (TOOL_STORE.deleted || []).filter(id => id !== existingId);
+  }else if(existingId){
+    const idx = (TOOL_STORE.custom || []).findIndex(item => item.id === existingId);
+    tool.id = existingId;
+    if(idx >= 0) TOOL_STORE.custom[idx] = tool;
+    else TOOL_STORE.custom.push(tool);
+  }else{
+    TOOL_STORE.custom.push(tool);
+  }
+  saveEditorStore();
+  closeToolEditor();
+  refreshToolView();
+}
+
+function deleteTool(id){
+  const tool = getToolById(id);
+  if(!tool) return;
+  if(!confirm(`ลบ/ซ่อน "${tool.name}" จากหน้านี้?`)) return;
+  if(isBaseTool(id)){
+    TOOL_STORE.deleted = [...new Set([...(TOOL_STORE.deleted || []), id])];
+    delete TOOL_STORE.edits[id];
+  }else{
+    TOOL_STORE.custom = (TOOL_STORE.custom || []).filter(item => item.id !== id);
+  }
+  saveEditorStore();
+  closeToolEditor();
+  refreshToolView();
+}
+
+function deleteToolFromModal(){
+  const id = document.getElementById('editor-id').value;
+  if(id) deleteTool(id);
+}
+
+function restoreOriginalTool(){
+  const id = document.getElementById('editor-id').value;
+  if(!id || !isBaseTool(id)) return;
+  delete TOOL_STORE.edits[id];
+  TOOL_STORE.deleted = (TOOL_STORE.deleted || []).filter(item => item !== id);
+  saveEditorStore();
+  closeToolEditor();
+  refreshToolView();
+}
+
+function resetEditorData(){
+  if(!confirm('ลบ edits/custom tools ทั้งหมดที่ใช้ร่วมกันบน server นี้? เครื่องอื่นที่เปิด URL เดียวกันจะถูก reset ด้วย')) return;
+  TOOL_STORE = defaultEditorStore();
+  saveEditorStore();
+  closeToolEditor();
+  refreshToolView();
+}
+
+function exportEditorData(){
+  const payload = {
+    version:1,
+    exportedAt:new Date().toISOString(),
+    store:TOOL_STORE
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ctf-tools-web2-edits.json';
+  document.body.appendChild(a);
+  a.click();
+  URL.revokeObjectURL(a.href);
+  document.body.removeChild(a);
+}
+
+function importEditorData(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      TOOL_STORE = normalizeEditorStore(parsed.store || parsed);
+      saveEditorStore();
+      refreshToolView();
+      alert('นำเข้า edits เรียบร้อย');
+    }catch(err){
+      alert('ไฟล์ JSON ไม่ถูกต้อง');
+    }finally{
+      input.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
 function toolSearchText(tool){
   const usage = (tool.usage || []).map(u => `${u.label || ''}\n${u.body || ''}`).join('\n');
   return [
-    tool.name, tool.desc, tool.about, tool.install, tool.url,
+    tool.name, tool.desc, tool.about, tool.blog, tool.install, tool.url,
     (tool.tags || []).join(' '),
     (tool.tips || []).join('\n'),
     (tool.checklist || []).join('\n'),
@@ -8636,11 +9188,22 @@ function toolSearchText(tool){
   ].join('\n').toLowerCase();
 }
 
+const ORIGINAL_TOOLS = TOOLS.map((tool, index) => Object.assign(
+  cloneToolValue(tool),
+  {id:safeToolId(tool.id || baseToolId(tool, index))}
+));
+let TOOL_STORE = readEditorStore();
+TOOLS = applyEditorStore();
+
 // ════════════════════════════════════════════════════════════
 // RENDER ENGINE
 // ════════════════════════════════════════════════════════════
 
 function esc(s){ return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+function escAttr(s){
+  return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
 function tagHtml(t){
   const cls={online:'tag-online',cli:'tag-cli',python:'tag-python',java:'tag-java',ruby:'tag-ruby'};
@@ -8663,6 +9226,8 @@ function renderCard(tool, q=''){
   // alias for non-escaped version (code blocks already use esc())
   const hi = hiE;
   const uid = 'card_' + Math.random().toString(36).slice(2);
+  const toolId = escAttr(tool.id || '');
+  const toolUrl = escAttr(tool.url || '');
 
   // build tabs
   const tabs=[], contents=[];
@@ -8678,6 +9243,15 @@ function renderCard(tool, q=''){
         <h4>${hi(tool.checklistTitle||'📋 Wargames / Levels')}</h4>
         <ul class="checklist">${tool.checklist.map(t=>`<li>${hi(t)}</li>`).join('')}</ul>
       </div>`:''}
+    </div>`);
+  }
+  if(tool.blog){
+    tabs.push({id:'blog',label:'Blog'});
+    contents.push(`<div class="tab-content" id="${uid}_blog">
+      <div class="doc-section">
+        <h4>Blog / Notes</h4>
+        <div class="doc-p">${hi(tool.blog)}</div>
+      </div>
     </div>`);
   }
   if(tool.install){
@@ -8707,7 +9281,9 @@ function renderCard(tool, q=''){
     <div class="card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="${uid}_body" onclick="toggleCard('${uid}','${firstTab}')" onkeydown="cardKey(event,'${uid}','${firstTab}')">
       <div class="card-top">
         <div class="card-name"><span class="dot"></span>${hi(tool.name)}</div>
-        <div class="card-actions">
+        <div class="editor-card-actions">
+          <button type="button" class="editor-mini-btn" onclick="event.stopPropagation();openToolEditor('${toolId}')">แก้ไข</button>
+          <button type="button" class="editor-mini-btn danger" onclick="event.stopPropagation();deleteTool('${toolId}')">ลบ</button>
           ${tool.url?`<a class="card-link" href="${tool.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">↗ เปิด</a>`:''}
           ${hasExpand?`<span class="card-expand" id="${uid}_btn">▾ ดูเพิ่ม</span>`:''}
         </div>
@@ -8748,13 +9324,14 @@ function switchTab(uid, tabId){
     t.classList.toggle('active', t.textContent.trim() === tabIdToLabel(tabId));
   });
   // hide all, show target
-  ['about','install','usage'].forEach(id=>{
+  ['about','blog','install','usage'].forEach(id=>{
     const el = document.getElementById(`${uid}_${id}`);
     if(el) el.classList.toggle('active', id===tabId);
   });
 }
 
 function tabIdToLabel(id){
+  if(id === 'blog') return 'Blog';
   return {about:'ภาพรวม',install:'ติดตั้ง',usage:'วิธีใช้'}[id]||id;
 }
 
@@ -8929,6 +9506,11 @@ document.addEventListener('keydown',e=>{
     primarySearchInput().focus();
   }
   if(e.key==='Escape'){
+    const modal = document.getElementById('editor-modal');
+    if(modal && modal.classList.contains('open')){
+      closeToolEditor();
+      return;
+    }
     const sb=primarySearchInput();
     handleSearch('', sb);
     sb.blur();
@@ -8945,6 +9527,7 @@ buildSidebar();
 buildSections();
 bindControls();
 showCat('all');
+loadSharedEditorStore().then(startSharedEditorPolling);
 </script>
 </body>
 </html>

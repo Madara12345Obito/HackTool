@@ -1,25 +1,23 @@
 # CTF Tools WEB2
 
-Static single-page CTF tools reference for GitHub Pages.
+Static single-page CTF tools reference.
 
-## Files hosted
+## Open from GitHub Pages
 
-- `index.html` redirects visitors to the main page.
-- `ctf_tools.html` is the full web app.
-- `.nojekyll` keeps GitHub Pages from filtering static files.
-- `.github/workflows/static.yml` deploys the site with GitHub Actions.
-
-## GitHub Pages hosting
-
-1. Open the repository on GitHub.
-2. Go to `Settings` -> `Pages`.
-3. Under `Build and deployment`, set `Source` to `GitHub Actions`.
-4. Push to the `main` branch.
-5. Wait for the `Deploy static content to Pages` workflow to finish.
-6. Open:
+Use the project root URL after GitHub Pages is enabled for the repository:
 
 ```text
 https://madara12345obito.github.io/HackTool/
 ```
 
-If the page shows `404`, wait a minute and refresh, or check the Actions tab for a failed deploy.
+`index.html` redirects to `ctf_tools.html`, so the root URL works on any device.
+
+## Open on the same Wi-Fi/LAN
+
+Run this from the project folder:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\serve-lan.ps1 -Port 8080
+```
+
+Then open the printed `Network:` URL from another device on the same network.
