@@ -1,0 +1,20 @@
+# Local backups and working files
+*.bak
+*.bak-*
+*.log
+*.pid
+stream.bin
+
+# Runtime/shared editor data from the local desktop server
+output/
+out/
+
+# Challenge/sample files are kept local only
+PicoCTF/
+
+# Local app/server helpers are not needed for GitHub Pages
+serve-lan.ps1
+*.exe
+*.cmd
+*.vbs
+*.lnk
